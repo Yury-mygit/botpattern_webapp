@@ -44,10 +44,16 @@ return(<div>Footer</div>)
 
 
 
+// In MonthlyCalendar.tsx
+type MonthlyCalendarProps = {
+  selectedDay: Date | null;
+  setSelectedDay: (date: Date | null) => void;
+  meetings: {[key: string]: {specialist: string, time: string}};
+  handleRegister: (event: React.FormEvent<HTMLFormElement>) => void;
+};
 
 
-
-export function Calendar() {
+export const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({selectedDay, setSelectedDay, meetings, handleRegister}) => {
   const [currentMonth, setCurrentMonth] = React.useState(new Date());
 
 
@@ -81,8 +87,8 @@ export function Calendar() {
   const currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0); // Normalize to compare only year, month, and day
 
-  const [selectedDay, setSelectedDay] = React.useState<Date | null>(null);
-  const [meetings, setMeetings] = React.useState<{[key: string]: {specialist: string, time: string}}>({});
+  // const [selectedDay, setSelectedDay] = React.useState<Date | null>(null);
+  // const [meetings, setMeetings] = React.useState<{[key: string]: {specialist: string, time: string}}>({});
 
   const generateCalendarDays = (daysArray: number[], monthOffset: number) => {
     return daysArray.map((day, index) => {
@@ -100,13 +106,13 @@ export function Calendar() {
     });
   };
 
-    const handleRegister = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const specialist = formData.get('specialist') as string;
-    const time = formData.get('time') as string;
-    setMeetings(prevMeetings => ({...prevMeetings, [selectedDay!.toISOString()]: {specialist, time}}));
-  };
+    // const handleRegister = (event: React.FormEvent<HTMLFormElement>) => {
+    // event.preventDefault();
+    // const formData = new FormData(event.currentTarget);
+    // const specialist = formData.get('specialist') as string;
+    // const time = formData.get('time') as string;
+    // setMeetings(prevMeetings => ({...prevMeetings, [selectedDay!.toISOString()]: {specialist, time}}));
+  // };
 
     type SessionProps = {
   selectedDay: Date | null;
