@@ -1,24 +1,27 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import { Calendar} from "./Components/Calendar/Calendar";
+
+declare global {
+  interface Window {
+    Telegram: any;
+  }
+}
+
+let a = window.Telegram.WebApp
+
+console.log(a.version)
+
+// Generate random events for testing
+
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+        <div className="border-2 border-amber-950">
+            <Calendar/>
+        </div>
+
     </div>
   );
 }
