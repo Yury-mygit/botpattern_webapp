@@ -1,39 +1,6 @@
 import * as React from 'react';
-import { FaBeer } from 'react-icons/fa';
-import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
+import Header from "../../Header/Header";
 
-type HeaderProps = {
-  prevMonth: () => void;
-  nextMonth: () => void;
-  currentMonth: Date;
-};
-
-type IconButtonProps = {
-  onClick: () => void;
-  children: React.ReactNode; // Add this line
-};
-
-const IconButton: React.FC<IconButtonProps> = ({ onClick, children }) => (
-  <button onClick={onClick} className="box-border border-2 border-transparent hover:border-blue-500 text-white font-bold py-2 px-4 rounded">
-    {children}
-  </button>
-);
-
-const Header: React.FC<HeaderProps> = ({ prevMonth, nextMonth, currentMonth }) => (
-  <div className="header flex justify-between items-center">
-    <div>
-      {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
-    </div>
-    <div>
-      <IconButton onClick={prevMonth}>
-        <FaArrowLeft />
-      </IconButton>
-      <IconButton onClick={nextMonth}>
-        <FaArrowRight />
-      </IconButton>
-    </div>
-  </div>
-);
 
 type FooterProps = {
 
@@ -106,13 +73,6 @@ export const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({selectedDay, se
     });
   };
 
-    // const handleRegister = (event: React.FormEvent<HTMLFormElement>) => {
-    // event.preventDefault();
-    // const formData = new FormData(event.currentTarget);
-    // const specialist = formData.get('specialist') as string;
-    // const time = formData.get('time') as string;
-    // setMeetings(prevMeetings => ({...prevMeetings, [selectedDay!.toISOString()]: {specialist, time}}));
-  // };
 
     type SessionProps = {
   selectedDay: Date | null;
