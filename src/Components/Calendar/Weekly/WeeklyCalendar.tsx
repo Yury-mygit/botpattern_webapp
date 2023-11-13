@@ -148,32 +148,44 @@ const Hour: React.FC<HourProps> = ({ hour, date, event, sessions, setSessions, g
           e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
       };
 
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        const dragData = JSON.parse(e.dataTransfer.getData('text/plain')) as {event: Session, originalDate: Date, originalHour: number};
-        const droppedEvent = dragData.event;
-        const originalDateObject = new Date(dragData.originalDate);
-        const originalDate = `${originalDateObject.getDate()}.${originalDateObject.getMonth() + 1}.${originalDateObject.getFullYear()}`;
+   const handleDrop = (e: React.DragEvent) => {
+  e.preventDefault();
+  const dragData = JSON.parse(e.dataTransfer.getData('text/plain')) as {event: Session, originalDate: Date, originalHour: number};
+  const droppedEvent = dragData.event;
+  const originalDateObject = new Date(dragData.originalDate);
+  const originalDate = `${originalDateObject.getDate()}.${originalDateObject.getMonth() + 1}.${originalDateObject.getFullYear()}`;
 
-        const originalHour = dragData.originalHour;
-        const originalDaySessions = sessions[originalDate];
-        const updatedOriginalDaySessions = originalDaySessions.filter((session: Session) => parseInt(session.time.split(' ')[0]) !== originalHour);
-        setSessions(prevSessions => {
-            const newSessions = { ...prevSessions };
-            newSessions[originalDate] = updatedOriginalDaySessions;
-        return newSessions;
-    });
+  const originalHour = dragData.originalHour;
+  const originalDaySessions = sessions[originalDate];
+  const updatedOriginalDaySessions = originalDaySessions.filter((session: Session) => parseInt(session.time.split(' ')[0]) !== originalHour);
 
-      // Add the dropped event to the target date and hour
-      const targetDate = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
-      const targetDaySessions = sessions[targetDate] || [];
-      const updatedTargetDaySessions = [...targetDaySessions, {...droppedEvent, time: `${hour} 00`}];
-      setSessions(prevSessions => {
-          const newSessions = { ...prevSessions };
-          newSessions[targetDate] = updatedTargetDaySessions;
-      return newSessions;
-    });
-    };
+  // Add the dropped event to the target date and hour
+  const targetDate = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
+  const targetDaySessions = sessions[targetDate] || [];
+  const targetEvent = getEvent(date, hour);
+
+  const updatedTargetDaySessions = targetDaySessions.map((session: Session) => {
+    if (parseInt(session.time.split(' ')[0]) === hour) {
+      return {...droppedEvent, time: `${hour} 00`};
+    }
+    return session;
+  });
+
+  if (!targetEvent) {
+    updatedTargetDaySessions.push({...droppedEvent, time: `${hour} 00`});
+  }
+
+  setSessions(prevSessions => {
+    const newSessions = { ...prevSessions };
+    newSessions[originalDate] = updatedOriginalDaySessions;
+    if (targetEvent) {
+      newSessions[originalDate].push({...targetEvent, time: `${originalHour} 00`});
+    }
+    newSessions[targetDate] = updatedTargetDaySessions;
+    return newSessions;
+  });
+};
+
 
     const handleDragOver = (e: React.DragEvent) => {
       e.preventDefault();
