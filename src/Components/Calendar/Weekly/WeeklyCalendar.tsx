@@ -4,14 +4,16 @@ import Footer from "../../Footer/Footer";
 import type {RootState } from "../../../store/store";
 import { useSelector, useDispatch } from 'react-redux'
 import { setUser } from '../../../store/userSlice'
-import { useState } from 'react';
-
+import {useEffect, useState} from 'react';
+import { FaDollarSign } from 'react-icons/fa';
 type WeeklyCalendarProps = {
   selectedDay: Date | null;
   setSelectedDay: (date: Date | null) => void;
   meetings: {[key: string]: {specialist: string, time: string}};
   handleRegister: (event: React.FormEvent<HTMLFormElement>) => void;
 };
+
+
 
 export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setSelectedDay, meetings, handleRegister}) => {
 
@@ -49,7 +51,7 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
             "student": "Дуся",
             "specialist": "Ксения",
             "online": false,
-            "paid": true,
+            "paid": false,
             "confirmed": true,
         },
         {
@@ -70,11 +72,17 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
         },
     ]
     })
-  const getEvent = (date: Date, hour: number): Session | null => {
-  const dateString = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
-  const session = sessions[dateString]?.find((session: Session) => parseInt(session.time.split(' ')[0]) === hour);
-  return session || null;
-}
+
+
+const getEvent = (date: Date, hour: number): Session | null => {
+      const dateString = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
+      const session = sessions[dateString]?.find((session: Session) => parseInt(session.time.split(' ')[0]) === hour);
+      return session || null;
+  }
+
+    useEffect(() => {
+        console.log(sessions)
+    }, [sessions]);
 
 
   const count = useSelector((state: RootState) => state.user)
@@ -126,6 +134,9 @@ type HourProps = {
   getEvent: (date: Date, hour: number) => Session | null;
 };
 
+
+
+
 const Hour: React.FC<HourProps> = ({ hour, date, event, sessions, setSessions, getEvent }) => {
 
       const handleDragStart = (e: React.DragEvent) => {
@@ -168,27 +179,25 @@ const Hour: React.FC<HourProps> = ({ hour, date, event, sessions, setSessions, g
       e.preventDefault();
     };
     return (
-        <div
-  key={hour}
-  className={`border w-12 h-8 text-xs flex justify-center items-center relative ${event?.paid ? 'has-green-corner' : ''}`}
-  draggable={event !== null}
-  onDragStart={handleDragStart}
-  onDrop={handleDrop}
-  onDragOver={handleDragOver}
->
-  {event?.paid &&
-    <div style={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: '10px',
-      height: '10px',
-      backgroundColor: 'green'
-    }}/>
-  }
-  <p>{event === null ? "" : `${event.student} `}</p>
-</div>
-    );
+  <div
+    key={hour}
+    className='border w-12 h-8 text-xs flex justify-center items-center relative'
+    draggable={event !== null}
+    onDragStart={handleDragStart}
+    onDrop={handleDrop}
+    onDragOver={handleDragOver}
+  >
+    {event &&
+      <FaDollarSign style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        color: event.paid ? 'green' : 'red'
+      }}/>
+    }
+    <p>{event === null ? "" : `${event.student} `}</p>
+  </div>
+);
 };
 
 
