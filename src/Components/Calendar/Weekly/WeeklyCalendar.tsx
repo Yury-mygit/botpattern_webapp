@@ -5,7 +5,7 @@ import type {RootState } from "../../../store/store";
 import { useSelector, useDispatch } from 'react-redux'
 import { setUser } from '../../../store/userSlice'
 import {useEffect, useState} from 'react';
-import { FaDollarSign } from 'react-icons/fa';
+import { FaDollarSign, FaVideo, FaRetweet } from 'react-icons/fa';
 type WeeklyCalendarProps = {
   selectedDay: Date | null;
   setSelectedDay: (date: Date | null) => void;
@@ -21,12 +21,16 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
 
     "14.11.2023":[
         {
-            'time': "12 00",
-            "student": "Дуся",
-            "specialist": "Ксения",
-            "online": false,
-            "paid": true,
-            "confirmed": true,
+          'time': "12 00",
+          "student": "Дуся",
+          "specialist": "Ксения",
+          "online": false,
+          "paid": true,
+          "confirmed": true,
+          "session_id": 1,
+          "student_id": 1,
+          "specialist_id": 1,
+          "repeatable": false,
         },
         {
             'time':"13 00",
@@ -35,6 +39,10 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
             "online": false,
             "paid": true,
             "confirmed": true,
+            "session_id": 1,
+          "student_id": 1,
+          "specialist_id": 1,
+          "repeatable": false,
         },
         {
             'time':"14 00",
@@ -43,6 +51,10 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
             "online": false,
             "paid": true,
             "confirmed": true,
+            "session_id": 1,
+          "student_id": 1,
+          "specialist_id": 1,
+          "repeatable": false,
         },
     ],
         "17.11.2023":[
@@ -53,6 +65,10 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
             "online": false,
             "paid": false,
             "confirmed": true,
+            "session_id": 1,
+          "student_id": 1,
+          "specialist_id": 1,
+          "repeatable": false,
         },
         {
             'time':"12 00",
@@ -61,14 +77,22 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
             "online": false,
             "paid": true,
             "confirmed": true,
+            "session_id": 1,
+          "student_id": 1,
+          "specialist_id": 1,
+          "repeatable": false,
         },
         {
             'time':"15 00",
             "student": "Саша",
             "specialist": "Ксения",
-            "online": false,
+            "online": true,
             "paid": true,
             "confirmed": true,
+            "session_id": 1,
+          "student_id": 1,
+          "specialist_id": 1,
+          "repeatable": true,
         },
     ]
     })
@@ -190,24 +214,38 @@ const Hour: React.FC<HourProps> = ({ hour, date, event, sessions, setSessions, g
     const handleDragOver = (e: React.DragEvent) => {
       e.preventDefault();
     };
-    return (
+return (
   <div
     key={hour}
-    className='border w-12 h-8 text-xs flex justify-center items-center relative'
+    className='border w-12 h-8 text-xs flex justify-center items-center relative' // Increase height to h-12
     draggable={event !== null}
     onDragStart={handleDragStart}
     onDrop={handleDrop}
     onDragOver={handleDragOver}
   >
     {event &&
-      <FaDollarSign style={{
+      <div style={{
         position: 'absolute',
         top: 0,
         left: 0,
-        color: event.paid ? 'green' : 'red'
-      }}/>
+        display: 'flex',
+        flexDirection: 'row', // Change to row
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: '100%', // Add width
+      }}>
+        <FaDollarSign style={{
+          color: event.paid ? 'green' : 'red'
+        }}/>
+        <FaVideo style={{
+          color: event.online ? 'blue' : 'gray'
+        }}/>
+        <FaRetweet style={{
+          color: event.repeatable ? 'orange' : 'gray'
+        }}/>
+      </div>
     }
-    <p>{event === null ? "" : `${event.student} `}</p>
+    <p className="mt-2">{event === null ? "" : `${event.student} `}</p>
   </div>
 );
 };
@@ -220,6 +258,10 @@ type Event = {
   online: boolean;
   paid: boolean;
   confirmed: boolean;
+  session_id: number;
+  student_id: number;
+  specialist_id: number;
+  repeatable: boolean;
 };
 
 type Session = Event & {
@@ -255,7 +297,15 @@ const [showIframe, setShowIframe] = useState(false);
                        <div className="HOUR flex flex-col">
                             {hours.map(hour => {
                               const event = getEvent(dayDate, hour);
-                              return <Hour hour={hour} date={dayDate} event={event} sessions={sessions} setSessions={setSessions} getEvent={getEvent} />;
+                              return (<Hour
+                                  key={`${dayDate.toString()}-${hour}`} // You have a key here
+                                  hour={hour}
+                                  date={dayDate}
+                                  event={event}
+                                  sessions={sessions}
+                                  setSessions={setSessions}
+                                  getEvent={getEvent}
+                              />);
                             })}
                        </div>
                     </div>
