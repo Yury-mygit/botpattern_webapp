@@ -52,6 +52,75 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
 const hours = generateHours();
 const url = "https://customer.freedompay.money/v1/merchant/545158/card/payment?pg_payment_id=8843482fc7534fe4ffd4fef11a72fc2d";
 
+
+
+
+type HourProps = {
+  hour: number;
+  event: Event | null;
+};
+
+const Hour: React.FC<HourProps> = ({ hour, event }) => (
+  <div key={hour} className='border w-12 h-8 text-xs'>
+    {event === null ? "" : `${event.student} `}
+  </div>
+);
+
+
+
+type Event = {
+  student: string;
+  specialist: string;
+  online: boolean;
+  paid: boolean;
+  confirmed: boolean;
+};
+
+type Session = Event & {
+  time: string;
+};
+
+type Sessions = {
+  [date: string]: Session[];
+};
+const getEvent = (date: Date, hour: number): Session | null => {
+  const dateString = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
+  const session = sessions[dateString]?.find(session => parseInt(session.time.split(' ')[0]) === hour);
+  return session || null;
+}
+
+
+let sessions: Sessions = {
+    "14.11.2023":[
+        {
+            'time': "12 00",
+            "student": "Дуся",
+            "specialist": "Ксения",
+            "online": false,
+            "paid": true,
+            "confirmed": true,
+        },
+        {
+            'time':"13 00",
+            "student": "Суша",
+            "specialist": "Ксения",
+            "online": false,
+            "paid": true,
+            "confirmed": true,
+        },
+        {
+            'time':"14 00",
+            "student": "Саша",
+            "specialist": "Ксения",
+            "online": false,
+            "paid": true,
+            "confirmed": true,
+        },
+    ]
+}
+
+
+
 const [showIframe, setShowIframe] = useState(false);
     const generateCalendarDays = (daysArray: Date[]) => {
         return daysArray.map((dayDate, index) => {
@@ -69,12 +138,11 @@ const [showIframe, setShowIframe] = useState(false);
                             {dayDate.getDate()}
                         </div>
 
-                        <div className="flex flex-col">
-                             {hours.map(hour => (
-                                 <div key={hour} className='border w-12 h-8 '>
-                                    hour
-                                 </div>
-                             ))}
+                        <div className="HOUR flex flex-col">
+                          {hours.map(hour => {
+                          const event = getEvent(dayDate, hour);
+                          return <Hour hour={hour} event={event} />;
+})}
                         </div>
                     </div>
 
