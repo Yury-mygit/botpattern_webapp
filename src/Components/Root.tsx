@@ -27,7 +27,7 @@ export  const Root = (props: Props) => {
 
     return (
         <div>
-            <h1>Привет мир!</h1>
+            {/*<h1>Привет мир!</h1>*/}
             <Outlet/>
         </div>
     );

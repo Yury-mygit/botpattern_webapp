@@ -2,14 +2,53 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
+import {User} from './Components/User/User'
 import {Root} from "./Components/Root"
 import reportWebVitals from './reportWebVitals';
 import { useNavigate } from 'react-router-dom';
+import { Provider } from 'react-redux'
+import {store} from "./store/store";
+import { useSelector, useDispatch } from 'react-redux'
+import {setUser} from "./store/userSlice";
 
 import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
+
+interface User {
+  id: number;
+  first_name: string;
+  last_name: string;
+  username: string;
+  language_code: string;
+  allows_write_to_pm: boolean;
+}
+function isAdmin(user: User) {
+  // TODO: Replace with your actual logic
+  return true;
+}
+
+function getRoutesForUser(user: User) {
+  if (isAdmin(user)) {
+    return [
+      {
+        path: "admin",
+        element:<App  />,
+        errorElement:<h1 className="flex align-middle justify-center">Возникла ошибка</h1>,
+      },
+    ];
+  } else {
+    return [
+      {
+        path: "user",
+        element: <h1> user </h1>,
+        errorElement:<h1 className="flex align-middle justify-center">Возникла ошибка</h1>,
+      },
+    ];
+  }
+}
+
 
 // let tg = window.Telegram.WebApp;
 // const params = new URLSearchParams(tg.initData);
@@ -36,19 +75,7 @@ const router = createBrowserRouter([
     path: "/",
     element: <Root id = {user.id}/>,
     errorElement:<h1 className="flex align-middle justify-center">Возникла ошибка</h1>,
-    children:[
-        {
-           path: "admin",
-           element:<App user={user} />,
-
-           errorElement:<h1 className="flex align-middle justify-center">Возникла ошибка</h1>,
-        },
-        {
-           path: "user",
-           element: <h1> user </h1>,
-           errorElement:<h1 className="flex align-middle justify-center">Возникла ошибка</h1>,
-        },
-    ]
+    children: getRoutesForUser(user),
   }
 ]);
 
@@ -56,10 +83,19 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
-  <React.StrictMode>
-    <RouterProvider router={router} />
-  </React.StrictMode>
+    <Provider store={store}>
+      <React.StrictMode>
+        <RouterProvider router={router} />
+      </React.StrictMode>
+    </Provider>,
 );
+
+
+
+
+
+
+
 
 
   //

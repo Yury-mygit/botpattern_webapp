@@ -4,7 +4,7 @@ type FooterProps = {
 
 }
 const Footer: React.FC<FooterProps> = ({})=>{
-return(<div>Footer</div>)
+return(<div className="Footer">Footer</div>)
 }
 
 export default Footer
