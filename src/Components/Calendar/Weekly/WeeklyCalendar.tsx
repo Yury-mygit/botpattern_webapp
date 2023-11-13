@@ -15,6 +15,44 @@ type WeeklyCalendarProps = {
 
 export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setSelectedDay, meetings, handleRegister}) => {
 
+
+    const [sessions, setSessions] = useState<Sessions>({
+
+    "14.11.2023":[
+        {
+            'time': "12 00",
+            "student": "Дуся",
+            "specialist": "Ксения",
+            "online": false,
+            "paid": true,
+            "confirmed": true,
+        },
+        {
+            'time':"13 00",
+            "student": "Суша",
+            "specialist": "Ксения",
+            "online": false,
+            "paid": true,
+            "confirmed": true,
+        },
+        {
+            'time':"14 00",
+            "student": "Саша",
+            "specialist": "Ксения",
+            "online": false,
+            "paid": true,
+            "confirmed": true,
+        },
+    ]
+    })
+
+    const getEvent = (date: Date, hour: number): Session | null => {
+  const dateString = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
+  const session = sessions[dateString]?.find((session: Session) => parseInt(session.time.split(' ')[0]) === hour);
+  return session || null;
+}
+
+
   const count = useSelector((state: RootState) => state.user)
   const dispatch = useDispatch()
 
@@ -57,14 +95,68 @@ const url = "https://customer.freedompay.money/v1/merchant/545158/card/payment?p
 
 type HourProps = {
   hour: number;
+  date: Date;
   event: Event | null;
+  sessions: Sessions;
+  setSessions: React.Dispatch<React.SetStateAction<Sessions>>;
+  getEvent: (date: Date, hour: number) => Session | null;
 };
 
-const Hour: React.FC<HourProps> = ({ hour, event }) => (
-  <div key={hour} className='border w-12 h-8 text-xs'>
-    {event === null ? "" : `${event.student} `}
-  </div>
-);
+const Hour: React.FC<HourProps> = ({ hour, date, event, sessions, setSessions, getEvent }) => {
+
+
+ const handleDragStart = (e: React.DragEvent) => {
+  const dragData = {
+    event,
+    originalDate: date,
+    originalHour: hour
+  };
+  e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+};
+
+const handleDrop = (e: React.DragEvent) => {
+  e.preventDefault();
+  const dragData = JSON.parse(e.dataTransfer.getData('text/plain')) as {event: Session, originalDate: Date, originalHour: number};
+  const droppedEvent = dragData.event;
+  const originalDateObject = new Date(dragData.originalDate);
+  const originalDate = `${originalDateObject.getDate()}.${originalDateObject.getMonth() + 1}.${originalDateObject.getFullYear()}`;
+
+  const originalHour = dragData.originalHour;
+  const originalDaySessions = sessions[originalDate];
+  const updatedOriginalDaySessions = originalDaySessions.filter((session: Session) => parseInt(session.time.split(' ')[0]) !== originalHour);
+setSessions(prevSessions => {
+  const newSessions = { ...prevSessions };
+  newSessions[originalDate] = updatedOriginalDaySessions;
+  return newSessions;
+});
+
+  // Add the dropped event to the target date and hour
+  const targetDate = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
+  const targetDaySessions = sessions[targetDate] || [];
+  const updatedTargetDaySessions = [...targetDaySessions, {...droppedEvent, time: `${hour} 00`}];
+setSessions(prevSessions => {
+  const newSessions = { ...prevSessions };
+  newSessions[targetDate] = updatedTargetDaySessions;
+  return newSessions;
+});
+};
+
+const handleDragOver = (e: React.DragEvent) => {
+  e.preventDefault();
+};
+  return (
+    <div
+      key={hour}
+      className='border w-12 h-8 text-xs'
+      draggable={event !== null}
+      onDragStart={handleDragStart}
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
+    >
+      {event === null ? "" : `${event.student} `}
+    </div>
+  );
+};
 
 
 
@@ -78,46 +170,13 @@ type Event = {
 
 type Session = Event & {
   time: string;
+
 };
 
 type Sessions = {
   [date: string]: Session[];
 };
-const getEvent = (date: Date, hour: number): Session | null => {
-  const dateString = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
-  const session = sessions[dateString]?.find(session => parseInt(session.time.split(' ')[0]) === hour);
-  return session || null;
-}
 
-
-let sessions: Sessions = {
-    "14.11.2023":[
-        {
-            'time': "12 00",
-            "student": "Дуся",
-            "specialist": "Ксения",
-            "online": false,
-            "paid": true,
-            "confirmed": true,
-        },
-        {
-            'time':"13 00",
-            "student": "Суша",
-            "specialist": "Ксения",
-            "online": false,
-            "paid": true,
-            "confirmed": true,
-        },
-        {
-            'time':"14 00",
-            "student": "Саша",
-            "specialist": "Ксения",
-            "online": false,
-            "paid": true,
-            "confirmed": true,
-        },
-    ]
-}
 
 
 
@@ -125,6 +184,7 @@ const [showIframe, setShowIframe] = useState(false);
     const generateCalendarDays = (daysArray: Date[]) => {
         return daysArray.map((dayDate, index) => {
             dayDate.setHours(0, 0, 0, 0); // Normalize to compare only year, month, and day
+
             return (
                 <div className="flex flex-row">
 
@@ -138,12 +198,12 @@ const [showIframe, setShowIframe] = useState(false);
                             {dayDate.getDate()}
                         </div>
 
-                        <div className="HOUR flex flex-col">
-                          {hours.map(hour => {
-                          const event = getEvent(dayDate, hour);
-                          return <Hour hour={hour} event={event} />;
-})}
-                        </div>
+                       <div className="HOUR flex flex-col">
+                            {hours.map(hour => {
+                              const event = getEvent(dayDate, hour);
+                              return <Hour hour={hour} date={dayDate} event={event} sessions={sessions} setSessions={setSessions} getEvent={getEvent} />;
+                            })}
+                       </div>
                     </div>
 
 
@@ -154,34 +214,22 @@ const [showIframe, setShowIframe] = useState(false);
         });
     };
 
-  return (
-    <div className="callendar_wrapper w-96 ">
-      <Header prevMonth={prevWeek} nextMonth={nextWeek} currentMonth={currentWeek}/>
-      <div className="CALENDAR flex flex-row mb-16">
-        <div className="pt-7 w-10 h-8">
-              {hours.map(hour => (
-                  <div key={hour} className="h-8">{hour}</div>
-              ))}
-            </div>
-        <div className="grid grid-cols-7 gap-1">
-          {generateCalendarDays(days)}
-        </div>
+ return (
+  <div className="callendar_wrapper w-96 ">
+    <Header prevMonth={prevWeek} nextMonth={nextWeek} currentMonth={currentWeek}/>
+    <div className="CALENDAR flex flex-row mb-16">
+      <div className="pt-7 w-10 h-8">
+        {hours.map(hour => (
+          <div key={hour} className="h-8">{hour}</div>
+        ))}
       </div>
-
-
-
+      <div className="grid grid-cols-7 gap-1">
+        {generateCalendarDays(days)}
+      </div>
     </div>
-  );
+  </div>
+);
 }
 
 
 
-
-//  {/*{count.id}*/}
-//       <Footer />
-//
-//          <button onClick={() => setShowIframe(!showIframe)}>
-//         {showIframe ? 'Закрыть' : 'Оплатить'}
-//       </button>
-//
-//       {showIframe && <iframe src={url} title="Payment Frame" style={{width: '100%', height: '600px'}}></iframe>}
