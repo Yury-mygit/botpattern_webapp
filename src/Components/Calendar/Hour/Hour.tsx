@@ -3,6 +3,12 @@ import * as React from 'react';
 import {Session, Sessions} from "../Interfases";
 import {FaDollarSign, FaRetweet, FaVideo} from "react-icons/fa";
 
+
+interface SessionWindowParams {
+  hour: number;
+  date: Date;
+}
+
 interface Props  {
   hour: number;
   date: Date;
@@ -10,7 +16,7 @@ interface Props  {
   sessions: Sessions;
   setSessions: React.Dispatch<React.SetStateAction<Sessions>>;
   getSession: (date: Date, hour: number) => Session | null;
-  setIsAddSessionWindowOpen: (reactState:number) => void
+  setIsAddSessionWindowOpen: (params: SessionWindowParams) => void; // Use the SessionWindowParams type here
 }
 
 export const Hour: React.FC<Props> = ({
@@ -75,14 +81,17 @@ export const Hour: React.FC<Props> = ({
       e.preventDefault();
     };
 
+
     let pressTimer: NodeJS.Timeout;
 
     const handleMouseDown = () => {
       pressTimer = setTimeout(() => {
-        console.log(session)
-        if (session === null) {
-          setIsAddSessionWindowOpen(1);
-        }
+
+        // if (session === null) {
+        //   setIsAddSessionWindowOpen({'hour': hour,'date': date});
+        // }
+        // else setEditedSessin(session)
+          setIsAddSessionWindowOpen({'hour': hour,'date': date});
       }, 1000); // Trigger the action if the mouse is pressed for more than 2 seconds
     };
 

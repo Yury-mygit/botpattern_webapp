@@ -5,12 +5,14 @@ import type {RootState } from "../../../store/store";
 import { useSelector, useDispatch } from 'react-redux'
 import { setUser } from '../../../store/userSlice'
 import {useEffect, useState} from 'react';
+
 import { FaDollarSign, FaVideo, FaRetweet } from 'react-icons/fa';
 import { FaTimes } from 'react-icons/fa'; // Import the cross icon
 
 import {Session, Sessions} from "../Interfases";
 import Hour from '../Hour/Hour'
 import AddSessionWindow from "../AddSessionWindow/AddSessionWindow";
+import HourList from "./HourList";
 
 type WeeklyCalendarProps = {
   selectedDay: Date | null;
@@ -24,11 +26,16 @@ type WeeklyCalendarProps = {
 export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setSelectedDay, meetings, handleRegister}) => {
 
 
+    interface SessionWindowParams {
+      hour: number;
+      date: Date;
+    }
+
     const handleClosePopup = () => {
-      setIsAddSessionWindowOpen(-1);
+      setIsAddSessionWindowOpen(null);
     };
 
-    const [isAddSessionWindowOpen, setIsAddSessionWindowOpen] = useState(-1)
+    const [isAddSessionWindowOpen, setIsAddSessionWindowOpen] = useState<SessionWindowParams|null>(null)
 
     const [sessions, setSessions] = useState<Sessions>({
 
@@ -116,6 +123,19 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
     ]
     })
 
+    const getStudents = (sessions:Sessions): string[] => {
+      const students = new Set<string>();
+
+      // Iterate over all dates
+      for (const date in sessions) {
+        // Iterate over all sessions on this date
+        for (const session of sessions[date]) {
+          students.add(session.student);
+        }
+      }
+
+      return Array.from(students);
+    };
 
     const getSession = (date: Date, hour: number): Session | null => {
         const dateString = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
@@ -148,7 +168,30 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
         }));
     };
 
+    const updateSession = (id: number, newSessionData: Partial<Session>) => {
+      // Iterate over all dates
+      for (const date in sessions) {
+        // Find the session with the given ID
+        const sessionIndex = sessions[date].findIndex(session => session.id === id);
 
+        if (sessionIndex !== -1) {
+          // Update the session data
+          const updatedSession = { ...sessions[date][sessionIndex], ...newSessionData };
+
+          // Set the updated sessions back to the state
+          setSessions(prevSessions => ({
+            ...prevSessions,
+            [date]: [
+              ...prevSessions[date].slice(0, sessionIndex),
+              updatedSession,
+              ...prevSessions[date].slice(sessionIndex + 1),
+            ],
+          }));
+
+          break;
+        }
+      }
+    };
 
     const count = useSelector((state: RootState) => state.user)
     const dispatch = useDispatch()
@@ -190,7 +233,7 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
             dayDate.setHours(0, 0, 0, 0); // Normalize to compare only year, month, and day
 
             return (
-                <div className="flex flex-row">
+                <div className="flex flex-row" key={index}>
 
                     <div>
                         <div
@@ -227,17 +270,22 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
       <div className="callendar_wrapper w-96 relative">
         <Header prevMonth={prevWeek} nextMonth={nextWeek} currentMonth={currentWeek}/>
         <div className="CALENDAR flex flex-row mb-16">
-          <div className="pt-5 w-8 h-8">
-            {hours.map(hour => (
-              <div key={hour} className="h-8">{hour}</div>
-            ))}
-          </div>
+          <HourList hours={hours} />
           <div className="grid grid-cols-7 gap-1">
             {generateCalendarDays(days)}
           </div>
-            {isAddSessionWindowOpen!=-1 && (
-              <AddSessionWindow handleClosePopup={handleClosePopup} addSession={addSession}/>
+            {isAddSessionWindowOpen!==null && (
+              <AddSessionWindow
+                  handleClosePopup={handleClosePopup}
+                  addSession={addSession}
+                  updateSession={updateSession}
+                  getSession={getSession}
+                  isAddSessionWindowOpen={isAddSessionWindowOpen}
+                  setIsAddSessionWindowOpen={setIsAddSessionWindowOpen}
+                  students={getStudents(sessions)}
+              />
             )}
+            <HourList hours={hours} />
         </div>
       </div>
     );
