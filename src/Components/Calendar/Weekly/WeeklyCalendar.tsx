@@ -137,6 +137,20 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
       return Array.from(students);
     };
 
+    const getSpecialists = (sessions:Sessions): string[] => {
+      const specialists = new Set<string>();
+
+      // Iterate over all dates
+      for (const date in sessions) {
+        // Iterate over all sessions on this date
+        for (const session of sessions[date]) {
+          specialists.add(session.specialist);
+        }
+      }
+
+      return Array.from(specialists);
+    };
+
     const getSession = (date: Date, hour: number): Session | null => {
         const dateString = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
         const session = sessions[dateString]?.find((session: Session) => parseInt(session.time.split(' ')[0]) === hour);
@@ -283,6 +297,7 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
                   isAddSessionWindowOpen={isAddSessionWindowOpen}
                   setIsAddSessionWindowOpen={setIsAddSessionWindowOpen}
                   students={getStudents(sessions)}
+                  specialists={ getSpecialists(sessions) }
               />
             )}
             <HourList hours={hours} />

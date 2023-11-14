@@ -2,6 +2,7 @@
 import * as React from 'react';
 import {Session, Sessions} from "../Interfases";
 import {FaDollarSign, FaRetweet, FaVideo} from "react-icons/fa";
+import {useEffect, useState} from "react";
 
 
 interface SessionWindowParams {
@@ -82,36 +83,35 @@ export const Hour: React.FC<Props> = ({
     };
 
 
-    let pressTimer: NodeJS.Timeout;
+const [lastTap, setLastTap] = useState(0);
+const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
+  const currentTime = new Date().getTime();
+  const diffTime = currentTime - lastTap;
 
-    const handleMouseDown = () => {
-      pressTimer = setTimeout(() => {
+  if (diffTime < 1000 && diffTime > 0) {
+    // The current tap happened within 1 second of the last tap, schedule the window to open after 1 second
+    setTimeout(() => {
+      setIsAddSessionWindowOpen({'hour': hour,'date': date});
+    }, 1000);
+  }
 
-        // if (session === null) {
-        //   setIsAddSessionWindowOpen({'hour': hour,'date': date});
-        // }
-        // else setEditedSessin(session)
-          setIsAddSessionWindowOpen({'hour': hour,'date': date});
-      }, 1000); // Trigger the action if the mouse is pressed for more than 2 seconds
-    };
-
-    const handleMouseUp = () => {
-      clearTimeout(pressTimer); // Clear the timer when the mouse is released
-    };
-
+  setLastTap(currentTime);
+};
 
 
     return (
-        <div
-            key={hour}
-            className='Hour border w-12 h-8 text-xs flex justify-center items-center relative' // Increase height to h-12
-            draggable={session !== null}
-            onDragStart={handleDragStart}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onMouseDown={handleMouseDown} // Add this line
-            onMouseUp={handleMouseUp} // Add this line
-        >
+<div
+    key={hour}
+    className='Hour border w-12 h-8 text-xs flex justify-center items-center relative' // Increase height to h-12
+    draggable={session !== null}
+    onDragStart={handleDragStart}
+    onDrop={handleDrop}
+    onDragOver={handleDragOver}
+    onMouseDown={handleMouseDown} // Add this line
+    // onMouseUp={handleMouseUp} // Add this line
+    onTouchStart={handleMouseDown} // Add this line
+    // onTouchEnd={handleMouseUp} // Add this line
+>
 
             {session &&
               <div style={{

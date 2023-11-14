@@ -17,6 +17,7 @@ interface Props  {
   isAddSessionWindowOpen:SessionWindowParams;
   setIsAddSessionWindowOpen:React.Dispatch<React.SetStateAction<SessionWindowParams | null>>
   students : string[]
+  specialists : string[]
 }
 const AddSessionWindow: React.FC<Props>  = ({
                                                 handleClosePopup,
@@ -25,7 +26,8 @@ const AddSessionWindow: React.FC<Props>  = ({
     updateSession,
                                                 isAddSessionWindowOpen,
                                                 setIsAddSessionWindowOpen,
-                                                students
+                                                students,
+    specialists
 }) => {
 
     const handleInnerDivClick = (e: React.MouseEvent) => {
@@ -94,8 +96,9 @@ const save = () => {
                   ))}
                 </select>
               <select className="w-full mt-4"> {/* Teacher dropdown */}
-                 <option>Пункт 1</option>
-                 <option>Пункт 2</option>
+                   {specialists.map((specialist, index) => (
+                    <option key={index} value={specialist}>{specialist}</option>
+                  ))}
               </select>
               <div className="mt-4"> {/* Lesson type radio buttons */}
                 <input type="radio" id="face-to-face" name="lesson-type" value="face-to-face" defaultChecked />
