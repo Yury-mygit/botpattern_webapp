@@ -300,7 +300,7 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
                   specialists={ getSpecialists(sessions) }
               />
             )}
-            <HourList hours={hours} />
+
         </div>
       </div>
     );

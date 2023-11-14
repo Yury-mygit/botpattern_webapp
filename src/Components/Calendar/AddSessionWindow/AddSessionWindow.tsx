@@ -4,6 +4,7 @@ import {FaTimes} from "react-icons/fa";
 import {Sessions} from "../Interfases";
 import {useState} from "react";
 import {Session} from "../Interfases";
+import { FaSave, FaTrash } from 'react-icons/fa';
 
 interface SessionWindowParams {
   hour: number;
@@ -39,6 +40,12 @@ const AddSessionWindow: React.FC<Props>  = ({
     const handleStudentChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
       setSelectedStudent(event.target.value);
     };
+
+
+const handleDelete = () => {
+    console.log('sdsdsds')
+}
+
 
 const save = () => {
   const existingSession = getSession(isAddSessionWindowOpen.date, isAddSessionWindowOpen.hour);
@@ -113,9 +120,15 @@ const save = () => {
                 <label htmlFor="one-time">One-time</label>
               </div>
               <textarea className="w-full mt-4" placeholder="Comments"></textarea> {/* Comments text area */}
-              <button className="w-full mt-4" onClick={()=>save()}>Save</button> {/* Save button */}
-              <button className="w-full mt-4" onClick={()=>console.log(students)}>Save</button> {/* Save button */}
-            </div>
+             <div className="flex justify-between mt-4"> {/* Container for the buttons */}
+  <button className="w-1/2 mr-2" onClick={()=>save()}> {/* Save button */}
+    <FaSave /> {/* Save icon */}
+  </button>
+  <button className="w-1/2 ml-2" onClick={()=>handleDelete}> {/* Delete button */}
+    <FaTrash /> {/* Delete icon */}
+  </button>
+</div>
+               </div>
           </div>
     );
 };
