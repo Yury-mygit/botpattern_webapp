@@ -6,6 +6,8 @@ import { useSelector, useDispatch } from 'react-redux'
 import { setUser } from '../../../store/userSlice'
 import {useEffect, useState} from 'react';
 import { FaDollarSign, FaVideo, FaRetweet } from 'react-icons/fa';
+
+
 type WeeklyCalendarProps = {
   selectedDay: Date | null;
   setSelectedDay: (date: Date | null) => void;
@@ -96,8 +98,7 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
         },
     ]
     })
-
-
+    const [isPopupOpen, setIsPopupOpen] = useState(false)
 const getEvent = (date: Date, hour: number): Session | null => {
       const dateString = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
       const session = sessions[dateString]?.find((session: Session) => parseInt(session.time.split(' ')[0]) === hour);
@@ -172,6 +173,8 @@ const Hour: React.FC<HourProps> = ({ hour, date, event, sessions, setSessions, g
           e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
       };
 
+
+
    const handleDrop = (e: React.DragEvent) => {
   e.preventDefault();
   const dragData = JSON.parse(e.dataTransfer.getData('text/plain')) as {event: Session, originalDate: Date, originalHour: number};
@@ -217,12 +220,19 @@ const Hour: React.FC<HourProps> = ({ hour, date, event, sessions, setSessions, g
 return (
   <div
     key={hour}
-    className='border w-12 h-8 text-xs flex justify-center items-center relative' // Increase height to h-12
+    className='Hour border w-12 h-8 text-xs flex justify-center items-center relative' // Increase height to h-12
     draggable={event !== null}
     onDragStart={handleDragStart}
     onDrop={handleDrop}
     onDragOver={handleDragOver}
+    onClick={() => {
+      if (event === null) {
+        setIsPopupOpen(true);
+      }
+    }}
   >
+
+
     {event &&
       <div style={{
         position: 'absolute',
@@ -233,7 +243,10 @@ return (
         alignItems: 'center',
         justifyContent: 'space-between',
         width: '100%', // Add width
-      }}>
+
+      }}
+      onClick={() => console.log('sasass')}
+      >
         <FaDollarSign style={{
           color: event.paid ? 'green' : 'red'
         }}/>
@@ -245,7 +258,7 @@ return (
         }}/>
       </div>
     }
-    <p className="mt-2">{event === null ? "" : `${event.student} `}</p>
+    <p onClick={() => console.log('sasass')} className="mt-2">{event === null ? "" : `${event.student} `}</p>
   </div>
 );
 };
@@ -326,6 +339,14 @@ const [showIframe, setShowIframe] = useState(false);
       <div className="grid grid-cols-7 gap-1">
         {generateCalendarDays(days)}
       </div>
+           {isPopupOpen && (
+      <div className="popup absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 border-4">
+        text
+      </div>
+    )}
+
+
+
     </div>
   </div>
 );
