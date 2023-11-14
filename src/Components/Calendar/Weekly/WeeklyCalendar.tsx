@@ -6,23 +6,35 @@ import { useSelector, useDispatch } from 'react-redux'
 import { setUser } from '../../../store/userSlice'
 import {useEffect, useState} from 'react';
 import { FaDollarSign, FaVideo, FaRetweet } from 'react-icons/fa';
+import { FaTimes } from 'react-icons/fa'; // Import the cross icon
 
+import {Session, Sessions} from "../Interfases";
+import Hour from '../Hour/Hour'
+import AddSessionWindow from "../AddSessionWindow/AddSessionWindow";
 
 type WeeklyCalendarProps = {
   selectedDay: Date | null;
   setSelectedDay: (date: Date | null) => void;
   meetings: {[key: string]: {specialist: string, time: string}};
-  handleRegister: (event: React.FormEvent<HTMLFormElement>) => void;
+  handleRegister: (session: React.FormEvent<HTMLFormElement>) => void;
 };
 
 
 
 export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setSelectedDay, meetings, handleRegister}) => {
 
-  const [sessions, setSessions] = useState<Sessions>({
+
+    const handleClosePopup = () => {
+      setIsAddSessionWindowOpen(-1);
+    };
+
+    const [isAddSessionWindowOpen, setIsAddSessionWindowOpen] = useState(-1)
+
+    const [sessions, setSessions] = useState<Sessions>({
 
     "14.11.2023":[
         {
+          'id': 1001,
           'time': "12 00",
           "student": "Дуся",
           "specialist": "Ксения",
@@ -35,6 +47,7 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
           "repeatable": false,
         },
         {
+            'id': 1002,
             'time':"13 00",
             "student": "Суша",
             "specialist": "Ксения",
@@ -47,6 +60,7 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
           "repeatable": false,
         },
         {
+            'id': 1003,
             'time':"14 00",
             "student": "Саша",
             "specialist": "Ксения",
@@ -59,237 +73,118 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
           "repeatable": false,
         },
     ],
-        "17.11.2023":[
-        {
-            'time': "9 00",
-            "student": "Дуся",
-            "specialist": "Ксения",
-            "online": false,
-            "paid": false,
-            "confirmed": true,
-            "session_id": 1,
-          "student_id": 1,
-          "specialist_id": 1,
-          "repeatable": false,
-        },
-        {
-            'time':"12 00",
-            "student": "Суша",
-            "specialist": "Ксения",
-            "online": false,
-            "paid": true,
-            "confirmed": true,
-            "session_id": 1,
-          "student_id": 1,
-          "specialist_id": 1,
-          "repeatable": false,
-        },
-        {
-            'time':"15 00",
-            "student": "Саша",
-            "specialist": "Ксения",
-            "online": true,
-            "paid": true,
-            "confirmed": true,
-            "session_id": 1,
-          "student_id": 1,
-          "specialist_id": 1,
-          "repeatable": true,
-        },
+    "17.11.2023":[
+    {
+        'id': 1005,
+        'time': "9 00",
+        "student": "Дуся",
+        "specialist": "Ксения",
+        "online": false,
+        "paid": false,
+        "confirmed": true,
+        "session_id": 1,
+      "student_id": 1,
+      "specialist_id": 1,
+      "repeatable": false,
+    },
+    {
+        'id': 1006,
+        'time':"12 00",
+        "student": "Суша",
+        "specialist": "Ксения",
+        "online": false,
+        "paid": true,
+        "confirmed": true,
+        "session_id": 1,
+      "student_id": 1,
+      "specialist_id": 1,
+      "repeatable": false,
+    },
+    {
+        'id': 1007,
+        'time':"15 00",
+        "student": "Саша",
+        "specialist": "Ксения",
+        "online": true,
+        "paid": true,
+        "confirmed": true,
+        "session_id": 1,
+      "student_id": 1,
+      "specialist_id": 1,
+      "repeatable": true,
+    },
     ]
     })
-    const [isPopupOpen, setIsPopupOpen] = useState(false)
-const getEvent = (date: Date, hour: number): Session | null => {
-      const dateString = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
-      const session = sessions[dateString]?.find((session: Session) => parseInt(session.time.split(' ')[0]) === hour);
-      return session || null;
-  }
-
-    useEffect(() => {
-        console.log(sessions)
-    }, [sessions]);
 
 
-  const count = useSelector((state: RootState) => state.user)
-  const dispatch = useDispatch()
-
-  const [currentWeek, setCurrentWeek] = React.useState(new Date());
-  // const [selectedDay, setSelectedDay] = React.useState<Date | null>(null);
-  // const [meetings, setMeetings] = React.useState<{[key: string]: {specialist: string, time: string}}>({});
-
-  const currentDate = new Date();
-  currentDate.setHours(0, 0, 0, 0); // Normalize to compare only year, month, and day
-
-  const prevWeek = () => {
-    setCurrentWeek(new Date(currentWeek.getFullYear(), currentWeek.getMonth(), currentWeek.getDate() - 7));
-  };
-
-  const nextWeek = () => {
-    setCurrentWeek(new Date(currentWeek.getFullYear(), currentWeek.getMonth(), currentWeek.getDate() + 7));
-  };
-
-  const startOfWeek = new Date(currentWeek.getFullYear(), currentWeek.getMonth(), currentWeek.getDate() - currentWeek.getDay());
-  const endOfWeek = new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate() + 6);
-
-  const days = [];
-  for (let i = 0; i <= 6; i++) {
-    days.push(new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate() + i));
-  }
-
-  function generateHours() {
-  const hours = [];
-  for (let i = 8; i <= 21; i++) {
-    hours.push(i);
-  }
-  return hours;
-}
-
-const hours = generateHours();
-const url = "https://customer.freedompay.money/v1/merchant/545158/card/payment?pg_payment_id=8843482fc7534fe4ffd4fef11a72fc2d";
-
-
-
-
-type HourProps = {
-  hour: number;
-  date: Date;
-  event: Event | null;
-  sessions: Sessions;
-  setSessions: React.Dispatch<React.SetStateAction<Sessions>>;
-  getEvent: (date: Date, hour: number) => Session | null;
-};
-
-
-
-
-const Hour: React.FC<HourProps> = ({ hour, date, event, sessions, setSessions, getEvent }) => {
-
-      const handleDragStart = (e: React.DragEvent) => {
-          const dragData = {
-                event,
-                originalDate: date,
-                originalHour: hour
-          };
-          e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
-      };
-
-
-
-   const handleDrop = (e: React.DragEvent) => {
-  e.preventDefault();
-  const dragData = JSON.parse(e.dataTransfer.getData('text/plain')) as {event: Session, originalDate: Date, originalHour: number};
-  const droppedEvent = dragData.event;
-  const originalDateObject = new Date(dragData.originalDate);
-  const originalDate = `${originalDateObject.getDate()}.${originalDateObject.getMonth() + 1}.${originalDateObject.getFullYear()}`;
-
-  const originalHour = dragData.originalHour;
-  const originalDaySessions = sessions[originalDate];
-  const updatedOriginalDaySessions = originalDaySessions.filter((session: Session) => parseInt(session.time.split(' ')[0]) !== originalHour);
-
-  // Add the dropped event to the target date and hour
-  const targetDate = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
-  const targetDaySessions = sessions[targetDate] || [];
-  const targetEvent = getEvent(date, hour);
-
-  const updatedTargetDaySessions = targetDaySessions.map((session: Session) => {
-    if (parseInt(session.time.split(' ')[0]) === hour) {
-      return {...droppedEvent, time: `${hour} 00`};
+    const getSession = (date: Date, hour: number): Session | null => {
+        const dateString = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
+        const session = sessions[dateString]?.find((session: Session) => parseInt(session.time.split(' ')[0]) === hour);
+        return session || null;
     }
-    return session;
-  });
 
-  if (!targetEvent) {
-    updatedTargetDaySessions.push({...droppedEvent, time: `${hour} 00`});
-  }
+    const addSession = (date: Date, time: string, student: string, specialist: string, online: boolean, paid: boolean, confirmed: boolean, sessionId: number, studentId: number, specialistId: number, repeatable: boolean) => {
+        const dateString = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
 
-  setSessions(prevSessions => {
-    const newSessions = { ...prevSessions };
-    newSessions[originalDate] = updatedOriginalDaySessions;
-    if (targetEvent) {
-      newSessions[originalDate].push({...targetEvent, time: `${originalHour} 00`});
-    }
-    newSessions[targetDate] = updatedTargetDaySessions;
-    return newSessions;
-  });
-};
+        // Create a new session object
+        const newSession: Session = {
+            id: Date.now(), // Use the current timestamp as a unique ID
+            time,
+            student,
+            specialist,
+            online,
+            paid,
+            confirmed,
+            session_id: sessionId,
+            student_id: studentId,
+            specialist_id: specialistId,
+            repeatable,
+        };
 
-
-    const handleDragOver = (e: React.DragEvent) => {
-      e.preventDefault();
+        // Add the new session to the sessions state
+        setSessions(prevSessions => ({
+            ...prevSessions,
+            [dateString]: prevSessions[dateString] ? [...prevSessions[dateString], newSession] : [newSession],
+        }));
     };
-return (
-  <div
-    key={hour}
-    className='Hour border w-12 h-8 text-xs flex justify-center items-center relative' // Increase height to h-12
-    draggable={event !== null}
-    onDragStart={handleDragStart}
-    onDrop={handleDrop}
-    onDragOver={handleDragOver}
-    onClick={() => {
-      if (event === null) {
-        setIsPopupOpen(true);
-      }
-    }}
-  >
 
 
-    {event &&
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        display: 'flex',
-        flexDirection: 'row', // Change to row
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        width: '100%', // Add width
 
-      }}
-      onClick={() => console.log('sasass')}
-      >
-        <FaDollarSign style={{
-          color: event.paid ? 'green' : 'red'
-        }}/>
-        <FaVideo style={{
-          color: event.online ? 'blue' : 'gray'
-        }}/>
-        <FaRetweet style={{
-          color: event.repeatable ? 'orange' : 'gray'
-        }}/>
-      </div>
+    const count = useSelector((state: RootState) => state.user)
+    const dispatch = useDispatch()
+
+    const [currentWeek, setCurrentWeek] = React.useState(new Date());
+    // const [selectedDay, setSelectedDay] = React.useState<Date | null>(null);
+    // const [meetings, setMeetings] = React.useState<{[key: string]: {specialist: string, time: string}}>({});
+
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0); // Normalize to compare only year, month, and day
+
+    const prevWeek = () => {
+    setCurrentWeek(new Date(currentWeek.getFullYear(), currentWeek.getMonth(), currentWeek.getDate() - 7));
+    };
+
+    const nextWeek = () => {
+    setCurrentWeek(new Date(currentWeek.getFullYear(), currentWeek.getMonth(), currentWeek.getDate() + 7));
+    };
+
+    const startOfWeek = new Date(currentWeek.getFullYear(), currentWeek.getMonth(), currentWeek.getDate() - currentWeek.getDay());
+    const endOfWeek = new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate() + 6);
+
+    const days = [];
+    for (let i = 0; i <= 6; i++) {
+    days.push(new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate() + i));
     }
-    <p onClick={() => console.log('sasass')} className="mt-2">{event === null ? "" : `${event.student} `}</p>
-  </div>
-);
-};
 
+    function generateHours() {
+        const hours = [];
+        for (let i = 8; i <= 21; i++) {
+            hours.push(i);
+        }
+        return hours;
+    }
 
-
-type Event = {
-  student: string;
-  specialist: string;
-  online: boolean;
-  paid: boolean;
-  confirmed: boolean;
-  session_id: number;
-  student_id: number;
-  specialist_id: number;
-  repeatable: boolean;
-};
-
-type Session = Event & {
-  time: string;
-
-};
-
-type Sessions = {
-  [date: string]: Session[];
-};
-
-
-
-
-const [showIframe, setShowIframe] = useState(false);
+    const hours = generateHours();
     const generateCalendarDays = (daysArray: Date[]) => {
         return daysArray.map((dayDate, index) => {
             dayDate.setHours(0, 0, 0, 0); // Normalize to compare only year, month, and day
@@ -309,15 +204,16 @@ const [showIframe, setShowIframe] = useState(false);
 
                        <div className="HOUR flex flex-col">
                             {hours.map(hour => {
-                              const event = getEvent(dayDate, hour);
+                              const session = getSession(dayDate, hour);
                               return (<Hour
                                   key={`${dayDate.toString()}-${hour}`} // You have a key here
                                   hour={hour}
                                   date={dayDate}
-                                  event={event}
+                                  session={session}
                                   sessions={sessions}
                                   setSessions={setSessions}
-                                  getEvent={getEvent}
+                                  getSession={getSession}
+                                  setIsAddSessionWindowOpen={setIsAddSessionWindowOpen}
                               />);
                             })}
                        </div>
@@ -327,29 +223,24 @@ const [showIframe, setShowIframe] = useState(false);
         });
     };
 
- return (
-  <div className="callendar_wrapper w-96 ">
-    <Header prevMonth={prevWeek} nextMonth={nextWeek} currentMonth={currentWeek}/>
-    <div className="CALENDAR flex flex-row mb-16">
-      <div className="pt-5 w-8 h-8">
-        {hours.map(hour => (
-          <div key={hour} className="h-8">{hour}</div>
-        ))}
+    return (
+      <div className="callendar_wrapper w-96 relative">
+        <Header prevMonth={prevWeek} nextMonth={nextWeek} currentMonth={currentWeek}/>
+        <div className="CALENDAR flex flex-row mb-16">
+          <div className="pt-5 w-8 h-8">
+            {hours.map(hour => (
+              <div key={hour} className="h-8">{hour}</div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {generateCalendarDays(days)}
+          </div>
+            {isAddSessionWindowOpen!=-1 && (
+              <AddSessionWindow handleClosePopup={handleClosePopup} addSession={addSession}/>
+            )}
+        </div>
       </div>
-      <div className="grid grid-cols-7 gap-1">
-        {generateCalendarDays(days)}
-      </div>
-           {isPopupOpen && (
-      <div className="popup absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 border-4">
-        text
-      </div>
-    )}
-
-
-
-    </div>
-  </div>
-);
+    );
 }
 
 
