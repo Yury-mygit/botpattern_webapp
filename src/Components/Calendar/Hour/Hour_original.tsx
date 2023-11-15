@@ -130,7 +130,7 @@ export const Hour: React.FC<Props> = ({
     // onTouchEnd={handleMouseUp} // Add this line
 >
 
-            {ses &&
+            {session &&
               <div style={{
                 position: 'absolute',
                 top: 0,
@@ -144,17 +144,17 @@ export const Hour: React.FC<Props> = ({
               }}
               >
                 <FaDollarSign style={{
-                  color: ses.paid ? 'green' : 'red'
+                  color: session.paid ? 'green' : 'red'
                 }}/>
                 <FaVideo style={{
-                  color: ses.online ? 'blue' : 'gray'
+                  color: session.online ? 'blue' : 'gray'
                 }}/>
                 <FaRetweet style={{
-                  color: ses.repeatable ? 'orange' : 'gray'
+                  color: session.repeatable ? 'orange' : 'gray'
                 }}/>
               </div>
         }
-        <p className="mt-2">{ses === null ? "" : `${ses.student_id} `}</p>
+        <p className="mt-2">{session === null ? "" : `${session.student} `}</p>
         </div>
     );
 };

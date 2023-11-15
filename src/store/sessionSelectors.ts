@@ -1,26 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 import {RootState} from "./store";
+import {SessionsListInterface, SessionInterface} from "./interface";
 
-// ...
-export interface Session {
-    id:number;
-    date: Date;
-    week_first_day: Date,
-    duration: number,   // in minute
-    student_id: number;
-    student_name: string;
-    specialist_id: number;
-    specialist_name: string;
-    office_id: number,
-    office_name: string,
-    performed: boolean,
-    paid: boolean;
-    online: boolean;
-    confirmed: boolean;
-    repeatable: boolean;
-    comments: string;
-}
-export interface Sessions extends Array<Session> {}
 export const selectSessions = (state: RootState) => state.sessions;
 
 export const getAllSessionOnWeek = createSelector(
@@ -30,14 +11,26 @@ export const getAllSessionOnWeek = createSelector(
     endOfWeek.setDate(endOfWeek.getDate() + 7);
     return { startOfWeek, endOfWeek };
   },
-  (sessions: Sessions, { startOfWeek, endOfWeek }) =>
+  (sessions: SessionsListInterface, { startOfWeek, endOfWeek }) =>
     sessions.filter(session =>
-      session.date >= startOfWeek && session.date < endOfWeek
+      session.startDateTime >= startOfWeek && session.startDateTime < endOfWeek
     )
 );
 
 export const getSessionById = createSelector(
   selectSessions,
   (state: RootState, sessionId: number) => sessionId,
-  (sessions: Sessions, sessionId) => sessions.find(session => session.id === sessionId)
+  (sessions: SessionsListInterface, sessionId) => sessions.find(session => session.id === sessionId)
+);
+
+export const getSessionByDate = createSelector(
+    selectSessions,
+    (state: RootState, date: Date) => date,
+    (sessions: SessionsListInterface, date) => sessions.find(session =>
+        session.startDateTime.getMinutes() === date.getMinutes() &&
+        session.startDateTime.getHours() === date.getHours() &&
+        session.startDateTime.getDate() === date.getDate() &&
+        session.startDateTime.getMonth() === date.getMonth() &&
+        session.startDateTime.getFullYear() === date.getFullYear()
+    )
 );
