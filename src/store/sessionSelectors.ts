@@ -12,8 +12,14 @@ export const getAllSessionOnWeek = createSelector(
     return { startOfWeek, endOfWeek };
   },
   (sessions: SessionsListInterface, { startOfWeek, endOfWeek }) =>
-    sessions.filter(session =>
-      session.startDateTime >= startOfWeek && session.startDateTime < endOfWeek
+    sessions.filter(session => {
+
+
+
+        return new Date(session.startDateTime) >= startOfWeek && new Date(session.startDateTime) < endOfWeek
+
+    }
+
     )
 );
 
@@ -23,14 +29,27 @@ export const getSessionById = createSelector(
   (sessions: SessionsListInterface, sessionId) => sessions.find(session => session.id === sessionId)
 );
 
+
+
 export const getSessionByDate = createSelector(
     selectSessions,
     (state: RootState, date: Date) => date,
-    (sessions: SessionsListInterface, date) => sessions.find(session =>
-        session.startDateTime.getMinutes() === date.getMinutes() &&
-        session.startDateTime.getHours() === date.getHours() &&
-        session.startDateTime.getDate() === date.getDate() &&
-        session.startDateTime.getMonth() === date.getMonth() &&
-        session.startDateTime.getFullYear() === date.getFullYear()
+    (sessions: SessionsListInterface, date) => sessions.find(session =>{
+
+        const Idate = new Date(session.startDateTime)
+
+        let a = JSON.stringify(new Date(2023, 10, 14, 13, 0, 0))
+
+        return (
+            Idate.getMinutes() === date.getMinutes() &&
+            Idate.getHours() === date.getHours() &&
+            Idate.getDate() === date.getDate() &&
+            Idate.getMonth() === date.getMonth() &&
+            Idate.getFullYear() === date.getFullYear()
+        )
+    }
+
     )
 );
+//"2023-11-14T10:00:00.000Z"
+//"2023-11-14T10:00:00.000Z"

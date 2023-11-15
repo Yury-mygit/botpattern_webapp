@@ -5,11 +5,11 @@ import {FaDollarSign, FaRetweet, FaVideo} from "react-icons/fa";
 import {useEffect, useState} from "react";
 
 import {useSelector, useDispatch} from "react-redux";
-
+import {addSession,updateSession,deleteSession} from "../../../store/sessionSlice";
 import {getSessionByDate} from '../../../store/sessionSelectors'
 import {SessionsListInterface, SessionInterface} from "../../../store/interface";
 import {RootState} from "../../../store/store";
-
+import {selectStudentById} from "../../../store/studentSlice";
 
 interface SessionWindowParams {
   hour: number;
@@ -19,85 +19,70 @@ interface SessionWindowParams {
 interface Props  {
   hour: number;
   date: Date;
-  session: Session | null;
-  sessions: Sessions;
-  setSessions: React.Dispatch<React.SetStateAction<Sessions>>;
-  getSession: (date: Date, hour: number) => Session | null;
   setIsAddSessionWindowOpen: (params: SessionWindowParams) => void; // Use the SessionWindowParams type here
 }
 
 export const Hour: React.FC<Props> = ({
                           hour,
                           date,
-                          session,
-                          sessions,
-                          setSessions,
-                          getSession,
                           setIsAddSessionWindowOpen
       }) => {
 
+    let dateAdapter = new Date(date)
+    dateAdapter.setHours(hour)
+    const dispatch = useDispatch();
 
-     let a = new Date(date)
-        a.setHours(hour)
+    let session1 = useSelector((state: RootState) => {
+        return getSessionByDate(state, dateAdapter)
+    })
 
-      let ses = useSelector((state: RootState) => getSessionByDate(state, a));
+const studentId = session1 !== undefined ? session1.student_id : -1;
+const selectCurrentStudent = selectStudentById(studentId);
+const student = useSelector(selectCurrentStudent);
 
 
-    console.log(ses)
 
-
-      const handleDragStart = (e: React.DragEvent) => {
-          const dragData = {
-                session,
-                originalDate: date,
-                originalHour: hour
-          };
-          e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+    const handleDragStart = (e: React.DragEvent) => {
+      const dragData = {
+        session: session1,
+        originalDate: date,
+        originalHour: hour
       };
+      e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
 
-   const handleDrop = (e: React.DragEvent) => {
+    };
+
+
+     let existingSession = useSelector((state: RootState) => {
+            return getSessionByDate(state, dateAdapter)
+     })
+
+    const handleDrop = (e: React.DragEvent) => {
       e.preventDefault();
-      const dragData = JSON.parse(e.dataTransfer.getData('text/plain')) as {session: Session, originalDate: Date, originalHour: number};
-      const droppedEvent = dragData.session;
-      const originalDateObject = new Date(dragData.originalDate);
-      const originalDate = `${originalDateObject.getDate()}.${originalDateObject.getMonth() + 1}.${originalDateObject.getFullYear()}`;
+      const dragData = JSON.parse(e.dataTransfer.getData('text/plain')) as {session: SessionInterface, originalDate: Date, originalHour: number};
 
-      const originalHour = dragData.originalHour;
-      const originalDaySessions = sessions[originalDate];
-      const updatedOriginalDaySessions = originalDaySessions.filter((session: Session) => parseInt(session.time.split(' ')[0]) !== originalHour);
 
-      // Add the dropped event to the target date and hour
-      const targetDate = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
-      const targetDaySessions = sessions[targetDate] || [];
-      const targetEvent = getSession(date, hour);
+      // Create a new date object for the date and hour where the session was dropped
+      const newDate = new Date(date);
+      newDate.setHours(hour);
 
-      const updatedTargetDaySessions = targetDaySessions.map((session: Session) => {
-        if (parseInt(session.time.split(' ')[0]) === hour) {
-          return {...droppedEvent, time: `${hour} 00`};
-        }
-        return session;
-      });
+      // Check if there's already a session at the drop location
+      // const existingSession = getSessionByDate(newDate, hour);
 
-      if (!targetEvent) {
-        updatedTargetDaySessions.push({...droppedEvent, time: `${hour} 00`});
+      if (existingSession) {
+            // If there is, swap their startDateTime values
+            dispatch(updateSession({ id: dragData.session.id, newSessionData: { ...dragData.session, startDateTime: existingSession.startDateTime } }));
+            dispatch(updateSession({ id: existingSession.id, newSessionData: { ...existingSession, startDateTime: dragData.session.startDateTime } }));
+      } else {
+        // If there isn't, just update the dropped session
+        dispatch(updateSession({ id: dragData.session.id, newSessionData: { ...dragData.session, startDateTime: newDate.toISOString() } }));
       }
-
-      setSessions(prevSessions => {
-        const newSessions = { ...prevSessions };
-        newSessions[originalDate] = updatedOriginalDaySessions;
-        if (targetEvent) {
-          newSessions[originalDate].push({...targetEvent, time: `${originalHour} 00`});
-        }
-        newSessions[targetDate] = updatedTargetDaySessions;
-        return newSessions;
-      });
-   };
+    };
 
 
     const handleDragOver = (e: React.DragEvent) => {
       e.preventDefault();
     };
-
 
     const [lastTap, setLastTap] = useState(0);
 
@@ -120,7 +105,7 @@ export const Hour: React.FC<Props> = ({
 <div
     key={hour}
     className='Hour border w-12 h-8 text-xs flex justify-center items-center relative' // Increase height to h-12
-    draggable={session !== null}
+    draggable={session1 !== undefined}
     onDragStart={handleDragStart}
     onDrop={handleDrop}
     onDragOver={handleDragOver}
@@ -130,7 +115,7 @@ export const Hour: React.FC<Props> = ({
     // onTouchEnd={handleMouseUp} // Add this line
 >
 
-            {ses &&
+            {session1 &&
               <div style={{
                 position: 'absolute',
                 top: 0,
@@ -144,17 +129,17 @@ export const Hour: React.FC<Props> = ({
               }}
               >
                 <FaDollarSign style={{
-                  color: ses.paid ? 'green' : 'red'
+                  color: session1.paid ? 'green' : 'red'
                 }}/>
                 <FaVideo style={{
-                  color: ses.online ? 'blue' : 'gray'
+                  color: session1.online ? 'blue' : 'gray'
                 }}/>
                 <FaRetweet style={{
-                  color: ses.repeatable ? 'orange' : 'gray'
+                  color: session1.repeatable ? 'orange' : 'gray'
                 }}/>
               </div>
         }
-        <p className="mt-2">{ses === null ? "" : `${ses.student_id} `}</p>
+        <p className="mt-2">{session1 && student ? `${student.first_name} ` : ""}</p>
         </div>
     );
 };

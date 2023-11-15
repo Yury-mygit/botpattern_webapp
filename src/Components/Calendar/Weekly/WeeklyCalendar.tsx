@@ -22,7 +22,6 @@ type WeeklyCalendarProps = {
 };
 
 
-
 export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setSelectedDay, meetings, handleRegister}) => {
 
 
@@ -157,55 +156,6 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
         return session || null;
     }
 
-    const addSession = (date: Date, time: string, student: string, specialist: string, online: boolean, paid: boolean, confirmed: boolean, sessionId: number, studentId: number, specialistId: number, repeatable: boolean) => {
-        const dateString = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
-
-        // Create a new session object
-        const newSession: Session = {
-            id: Date.now(), // Use the current timestamp as a unique ID
-            time,
-            student,
-            specialist,
-            online,
-            paid,
-            confirmed,
-            session_id: sessionId,
-            student_id: studentId,
-            specialist_id: specialistId,
-            repeatable,
-        };
-
-        // Add the new session to the sessions state
-        setSessions(prevSessions => ({
-            ...prevSessions,
-            [dateString]: prevSessions[dateString] ? [...prevSessions[dateString], newSession] : [newSession],
-        }));
-    };
-
-    const updateSession = (id: number, newSessionData: Partial<Session>) => {
-      // Iterate over all dates
-      for (const date in sessions) {
-        // Find the session with the given ID
-        const sessionIndex = sessions[date].findIndex(session => session.id === id);
-
-        if (sessionIndex !== -1) {
-          // Update the session data
-          const updatedSession = { ...sessions[date][sessionIndex], ...newSessionData };
-
-          // Set the updated sessions back to the state
-          setSessions(prevSessions => ({
-            ...prevSessions,
-            [date]: [
-              ...prevSessions[date].slice(0, sessionIndex),
-              updatedSession,
-              ...prevSessions[date].slice(sessionIndex + 1),
-            ],
-          }));
-
-          break;
-        }
-      }
-    };
 
     const count = useSelector((state: RootState) => state.user)
     const dispatch = useDispatch()
@@ -266,10 +216,6 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
                                   key={`${dayDate.toString()}-${hour}`} // You have a key here
                                   hour={hour}
                                   date={dayDate}
-                                  session={session}
-                                  sessions={sessions}
-                                  setSessions={setSessions}
-                                  getSession={getSession}
                                   setIsAddSessionWindowOpen={setIsAddSessionWindowOpen}
                               />);
                             })}
@@ -291,9 +237,6 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
             {isAddSessionWindowOpen!==null && (
               <AddSessionWindow
                   handleClosePopup={handleClosePopup}
-                  addSession={addSession}
-                  updateSession={updateSession}
-                  getSession={getSession}
                   isAddSessionWindowOpen={isAddSessionWindowOpen}
                   setIsAddSessionWindowOpen={setIsAddSessionWindowOpen}
                   students={getStudents(sessions)}
