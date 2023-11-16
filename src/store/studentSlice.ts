@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit'
 import { RootState } from './store' // import your store
 import {StudentInterface} from './interface'
+import {useSelector} from "react-redux";
 
 interface StudentsState {
   students: StudentInterface[];

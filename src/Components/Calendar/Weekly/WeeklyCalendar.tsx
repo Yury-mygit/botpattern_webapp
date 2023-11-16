@@ -1,3 +1,10 @@
+/*
+follow tasks:
+Rework the timeline, instead of breaking it down into hours, it should be a continuous line, and the activity can be attached to any minute
+
+Additionally, make a setting so that sessions can be linked not to every minute, but in increments of 5 10 15 20 30 60 minutes
+*/
+
 import * as React from 'react';
 import Header from "../../Header/Header";
 import Footer from "../../Footer/Footer";
@@ -30,139 +37,11 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
       date: Date;
     }
 
-    const handleClosePopup = () => {
-      setIsAddSessionWindowOpen(null);
-    };
+    const handleClosePopup = () => setIsAddSessionWindowOpen(null)
 
     const [isAddSessionWindowOpen, setIsAddSessionWindowOpen] = useState<SessionWindowParams|null>(null)
 
-    const [sessions, setSessions] = useState<Sessions>({
-
-    "14.11.2023":[
-        {
-          'id': 1001,
-          'time': "12 00",
-          "student": "Дуся",
-          "specialist": "Ксения",
-          "online": false,
-          "paid": true,
-          "confirmed": true,
-          "session_id": 1,
-          "student_id": 1,
-          "specialist_id": 1,
-          "repeatable": false,
-        },
-        {
-            'id': 1002,
-            'time':"13 00",
-            "student": "Суша",
-            "specialist": "Ксения",
-            "online": false,
-            "paid": true,
-            "confirmed": true,
-            "session_id": 1,
-          "student_id": 1,
-          "specialist_id": 1,
-          "repeatable": false,
-        },
-        {
-            'id': 1003,
-            'time':"14 00",
-            "student": "Саша",
-            "specialist": "Ксения",
-            "online": false,
-            "paid": true,
-            "confirmed": true,
-            "session_id": 1,
-          "student_id": 1,
-          "specialist_id": 1,
-          "repeatable": false,
-        },
-    ],
-    "17.11.2023":[
-    {
-        'id': 1005,
-        'time': "9 00",
-        "student": "Дуся",
-        "specialist": "Ксения",
-        "online": false,
-        "paid": false,
-        "confirmed": true,
-        "session_id": 1,
-      "student_id": 1,
-      "specialist_id": 1,
-      "repeatable": false,
-    },
-    {
-        'id': 1006,
-        'time':"12 00",
-        "student": "Суша",
-        "specialist": "Ксения",
-        "online": false,
-        "paid": true,
-        "confirmed": true,
-        "session_id": 1,
-      "student_id": 1,
-      "specialist_id": 1,
-      "repeatable": false,
-    },
-    {
-        'id': 1007,
-        'time':"15 00",
-        "student": "Саша",
-        "specialist": "Ксения",
-        "online": true,
-        "paid": true,
-        "confirmed": true,
-        "session_id": 1,
-      "student_id": 1,
-      "specialist_id": 1,
-      "repeatable": true,
-    },
-    ]
-    })
-
-    const getStudents = (sessions:Sessions): string[] => {
-      const students = new Set<string>();
-
-      // Iterate over all dates
-      for (const date in sessions) {
-        // Iterate over all sessions on this date
-        for (const session of sessions[date]) {
-          students.add(session.student);
-        }
-      }
-
-      return Array.from(students);
-    };
-
-    const getSpecialists = (sessions:Sessions): string[] => {
-      const specialists = new Set<string>();
-
-      // Iterate over all dates
-      for (const date in sessions) {
-        // Iterate over all sessions on this date
-        for (const session of sessions[date]) {
-          specialists.add(session.specialist);
-        }
-      }
-
-      return Array.from(specialists);
-    };
-
-    const getSession = (date: Date, hour: number): Session | null => {
-        const dateString = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
-        const session = sessions[dateString]?.find((session: Session) => parseInt(session.time.split(' ')[0]) === hour);
-        return session || null;
-    }
-
-
-    const count = useSelector((state: RootState) => state.user)
-    const dispatch = useDispatch()
-
     const [currentWeek, setCurrentWeek] = React.useState(new Date());
-    // const [selectedDay, setSelectedDay] = React.useState<Date | null>(null);
-    // const [meetings, setMeetings] = React.useState<{[key: string]: {specialist: string, time: string}}>({});
 
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0); // Normalize to compare only year, month, and day
@@ -176,7 +55,6 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
     };
 
     const startOfWeek = new Date(currentWeek.getFullYear(), currentWeek.getMonth(), currentWeek.getDate() - currentWeek.getDay());
-    const endOfWeek = new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate() + 6);
 
     const days = [];
     for (let i = 0; i <= 6; i++) {
@@ -211,7 +89,6 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
 
                        <div className="HOUR flex flex-col">
                             {hours.map(hour => {
-                              const session = getSession(dayDate, hour);
                               return (<Hour
                                   key={`${dayDate.toString()}-${hour}`} // You have a key here
                                   hour={hour}
@@ -239,8 +116,6 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
                   handleClosePopup={handleClosePopup}
                   isAddSessionWindowOpen={isAddSessionWindowOpen}
                   setIsAddSessionWindowOpen={setIsAddSessionWindowOpen}
-                  students={getStudents(sessions)}
-                  specialists={ getSpecialists(sessions) }
               />
             )}
 

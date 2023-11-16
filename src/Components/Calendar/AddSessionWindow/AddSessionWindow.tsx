@@ -9,9 +9,10 @@ import {addSession, updateSession, deleteSession} from "../../../store/sessionSl
 import {getSessionByDate} from "../../../store/sessionSelectors";
 import {useSelector, useDispatch} from "react-redux";
 import {RootState} from "../../../store/store";
-import {selectAllStudents} from "../../../store/studentSlice";
+import {selectAllStudents, selectStudentById} from "../../../store/studentSlice";
 
 import {StudentInterface} from "../../../store/interface";
+import SessionView from "./SessionView";
 
 interface SessionWindowParams {
   hour: number;
@@ -21,48 +22,52 @@ interface Props  {
   handleClosePopup: () => void;
   isAddSessionWindowOpen:SessionWindowParams;
   setIsAddSessionWindowOpen:React.Dispatch<React.SetStateAction<SessionWindowParams | null>>
-  students : string[]
-  specialists : string[]
+  specialists? : string[]
 }
 const AddSessionWindow: React.FC<Props>  = ({
                                                 handleClosePopup,
                                                 isAddSessionWindowOpen,
                                                 setIsAddSessionWindowOpen,
-                                                // students,
-                                                specialists
+                                                specialists=['Ксения, Валентина']
 }) => {
 
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
+  const students = useSelector(selectAllStudents);
+  const [selectedStudent, setSelectedStudent] = useState<StudentInterface>(students[0]);
 
+  const [windowState, setWindowState] = useState('session');
 
-    const students = useSelector((state: RootState) => selectAllStudents(state));
+  const existingSession  = useSelector((state: RootState) => getSessionByDate(state, isAddSessionWindowOpen.date))
 
-    const handleInnerDivClick = (e: React.MouseEvent) => {
+  const student = useSelector(selectStudentById(selectedStudent.id));
+  // console.log(studentsssss)
+
+  let targetDate :Date = isAddSessionWindowOpen.date
+    targetDate.setHours(isAddSessionWindowOpen.hour)
+
+  let session = useSelector((state: RootState) => {
+    return getSessionByDate(state, targetDate)
+  })
+
+  const handleInnerDivClick = (e: React.MouseEvent):void => {
       e.stopPropagation(); // Prevent the click event from propagating to the win_wrap div
     };
 
-    const [selectedStudent, setSelectedStudent] = useState<StudentInterface>(students[0]);
 
-    const handleStudentChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-      // setSelectedStudent(event.target.value);
-      const selectedStudent = students.find(st => st.id.toString() == event.target.value);
-      if (selectedStudent) {
-        setSelectedStudent(selectedStudent);
-      } else {
-        // Handle the case where no student was found
-      }
-    };
-
-
-    const handleDelete = () => {
-        console.log('sdsdsds')
+  const handleStudentChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    // setSelectedStudent(event.target.value);
+    const selectedStudent = students.find(st => st.id.toString() == event.target.value);
+    if (selectedStudent) {
+      setSelectedStudent(selectedStudent);
+    } else {
+      // Handle the case where no student was found
     }
+  };
 
 
-
-
-
-
+  const handleDelete = () => {
+      console.log('sdsdsds')
+  }
 
 
     const makeNewSession = () =>{
@@ -94,10 +99,6 @@ const AddSessionWindow: React.FC<Props>  = ({
 
 
 
-    const existingSession  = useSelector((state: RootState) => {
-        // console.log(state)
-        return getSessionByDate(state, isAddSessionWindowOpen.date)
-    })
 
    const save = () => {
   if (existingSession === undefined) {
@@ -111,52 +112,32 @@ const AddSessionWindow: React.FC<Props>  = ({
 };
 
 
-    return (
-        <div className="
-        win_wrap
-        fixed
-        w-full
-        h-full
-        top-0
-        left-0
-        "
-             style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}} onClick={handleClosePopup}>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2  border-4 bg-white" onClick={handleInnerDivClick}>
-              <FaTimes className="cursor-pointer absolute top-0 right-0 m-1" onClick={handleClosePopup} /> {/* Cross icon */}
-               <select className="w-full mt-4" value={selectedStudent.first_name} onChange={handleStudentChange}> {/* Student dropdown */}
-                  {students.map((student, index) => (
-                    <option key={index} value={student.id}>{student.first_name}</option>
-                  ))}
-                </select>
-              <select className="w-full mt-4"> {/* Teacher dropdown */}
-                   {specialists.map((specialist, index) => (
-                    <option key={index} value={specialist}>{specialist}</option>
-                  ))}
-              </select>
-              <div className="mt-4"> {/* Lesson type radio buttons */}
-                <input type="radio" id="face-to-face" name="lesson-type" value="face-to-face" defaultChecked />
-                <label htmlFor="face-to-face">Очно</label><br />
-                <input type="radio" id="online" name="lesson-type" value="online" />
-                <label htmlFor="online">Онлайн</label>
-              </div>
-              <div className="mt-4"> {/* Repetition radio buttons */}
-                <input type="radio" id="repeating" name="repetition" value="repeating" defaultChecked />
-                <label htmlFor="repeating">Repeating</label><br />
-                <input type="radio" id="one-time" name="repetition" value="one-time" />
-                <label htmlFor="one-time">One-time</label>
-              </div>
-              <textarea className="w-full mt-4" placeholder="Comments"></textarea> {/* Comments text area */}
-             <div className="flex justify-between mt-4"> {/* Container for the buttons */}
-  <button className="w-1/2 mr-2" onClick={()=>save()}> {/* Save button */}
-    <FaSave /> {/* Save icon */}
-  </button>
-  <button className="w-1/2 ml-2" onClick={()=>handleDelete}> {/* Delete button */}
-    <FaTrash /> {/* Delete icon */}
-  </button>
-</div>
-               </div>
-          </div>
-    );
+return (
+  <div className="win_wrap fixed w-full h-full top-0 left-0" style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}} onClick={handleClosePopup}>
+    {windowState == 'session' && (
+      <SessionView
+        targetDate={targetDate}
+        selectedStudent={selectedStudent}
+        handleStudentChange={handleStudentChange}
+        students={students}
+        specialists={specialists}
+        session={session}
+        save={save}
+        handleDelete={handleDelete}
+        handleClosePopup={handleClosePopup}
+        handleInnerDivClick={handleInnerDivClick}
+      />
+    )
+    }
+  </div>
+);
+
 };
 
 export default AddSessionWindow
+
+
+
+// const YourComponent = () => {
+//   const id = 1; // replace with the actual ID you want to select
+//   const student = useSelector(selectStudentById(id));
