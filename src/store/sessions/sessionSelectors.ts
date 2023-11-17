@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit';
-import {RootState} from "./store";
-import {SessionsListInterface, SessionInterface} from "./interface";
+import {RootState} from "../store";
+import {SessionsListInterface, SessionInterface} from "../interface";
 
 export const selectSessions = (state: RootState) => state.sessions;
 

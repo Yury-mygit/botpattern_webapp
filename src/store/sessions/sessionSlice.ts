@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import {SessionsListInterface, SessionInterface} from "./interface";
+import {SessionsListInterface, SessionInterface} from "../interface";
 
 const initialState: SessionsListInterface = [
     {

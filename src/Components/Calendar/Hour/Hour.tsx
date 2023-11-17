@@ -5,11 +5,11 @@ import {FaDollarSign, FaRetweet, FaVideo} from "react-icons/fa";
 import {useEffect, useState} from "react";
 
 import {useSelector, useDispatch} from "react-redux";
-import {addSession,updateSession,deleteSession} from "../../../store/sessionSlice";
-import {getSessionByDate} from '../../../store/sessionSelectors'
+import {addSession,updateSession,deleteSession} from "../../../store/sessions/sessionSlice";
+import {getSessionByDate} from '../../../store/sessions/sessionSelectors'
 import {SessionsListInterface, SessionInterface} from "../../../store/interface";
 import {RootState} from "../../../store/store";
-import {selectStudentById} from "../../../store/studentSlice";
+import {selectStudentById} from "../../../store/students/studentSlice";
 
 interface SessionWindowParams {
   hour: number;
@@ -28,6 +28,10 @@ export const Hour: React.FC<Props> = ({
                           setIsAddSessionWindowOpen
       }) => {
 
+
+    let dragging = false;
+
+
     let dateAdapter = new Date(date)
     dateAdapter.setHours(hour)
     const dispatch = useDispatch();
@@ -36,13 +40,15 @@ export const Hour: React.FC<Props> = ({
         return getSessionByDate(state, dateAdapter)
     })
 
-const studentId = session1 !== undefined ? session1.student_id : -1;
-const selectCurrentStudent = selectStudentById(studentId);
-const student = useSelector(selectCurrentStudent);
+    const studentId = session1 !== undefined ? session1.student_id : -1;
+    const selectCurrentStudent = selectStudentById(studentId);
+    const student = useSelector(selectCurrentStudent);
 
 
 
     const handleDragStart = (e: React.DragEvent) => {
+      console.log('handleDragStart')
+      dragging = true;
       const dragData = {
         session: session1,
         originalDate: date,
@@ -51,6 +57,8 @@ const student = useSelector(selectCurrentStudent);
       e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
 
     };
+
+
 
 
      let existingSession = useSelector((state: RootState) => {
@@ -87,6 +95,13 @@ const student = useSelector(selectCurrentStudent);
     const [lastTap, setLastTap] = useState(0);
 
     const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
+
+       if (dragging) {
+        dragging = false;
+        return;
+      }
+
+
       const currentTime = new Date().getTime();
       const diffTime = currentTime - lastTap;
 
@@ -101,6 +116,7 @@ const student = useSelector(selectCurrentStudent);
     };
 
 
+
     return (
 <div
     key={hour}
@@ -113,6 +129,8 @@ const student = useSelector(selectCurrentStudent);
     // onMouseUp={handleMouseUp} // Add this line
     onTouchStart={handleMouseDown} // Add this line
     // onTouchEnd={handleMouseUp} // Add this line
+
+
 >
 
             {session1 &&
