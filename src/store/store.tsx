@@ -10,7 +10,6 @@ export const store = configureStore({
     user: userReducer,
     sessions: sessionsReducer,
     employeesList: employeesListReducer
-    // other reducers...
   },
 })
 

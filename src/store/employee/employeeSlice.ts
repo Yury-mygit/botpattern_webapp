@@ -1,12 +1,26 @@
 import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit'
 import { RootState } from '../store' // import your store
-import {StudentInterface} from '../interface'
-import {EmployeeInterface, EmployeesListInterface} from '../interface'
+
+
 import {useSelector} from "react-redux";
 
+export interface Employee {
+  id: number;
+  status: string;
+  position:string;
+  profession?:string;
+  first_name:string;
+  last_name:string;
+  contact_email?:string;
+  contact_telephone?:string;
+  telegram_id?:string;
+  online?:boolean;
+  offline?:boolean;
+}
 
-const initialState: EmployeesListInterface = {
-  employeesList: [
+
+const initialState: Employee[] =
+   [
     {
         'id': 1001,
         'status': 'string',
@@ -46,27 +60,25 @@ const initialState: EmployeesListInterface = {
       'online':true,
       'offline':true,
     },
-  ],
-}
+  ]
+
 
 const employeesListSlice = createSlice({
   name: 'employeesList',
   initialState,
   reducers: {
-    addStudent: (state, action: PayloadAction<EmployeeInterface>) => {
-      state.employeesList.push(action.payload);
+    addEmployee: (state, action: PayloadAction<Employee>) => {
+      state.push(action.payload);
     },
 
-    deleteStudent: (state, action: PayloadAction<number>) => {
-      state.employeesList = state.employeesList.filter(student => student.id !== action.payload);
+    deleteEmployee: (state, action: PayloadAction<number>) => {
+      state = state.filter(employee => employee.id !== action.payload);
     },
 
-
-
-    updateStudent: (state, action: PayloadAction<EmployeeInterface>) => {
-      const index = state.employeesList.findIndex(student => student.id === action.payload.id);
+    updateEmployee: (state, action: PayloadAction<Employee>) => {
+      const index = state.findIndex(employee => employee.id === action.payload.id);
       if (index !== -1) {
-        state.employeesList[index] = action.payload;
+        state[index] = action.payload;
       }
     },
 
@@ -74,12 +86,15 @@ const employeesListSlice = createSlice({
   },
 })
 
-export const { addStudent, deleteStudent, updateStudent } = employeesListSlice.actions
+export const { addEmployee, deleteEmployee, updateEmployee } = employeesListSlice.actions
 
 export default employeesListSlice.reducer
 
+
+
+
 // Selectors
-export const selectAllEmployees = (state: RootState) => state.employeesList.employeesList
+export const selectAllEmployees = (state: RootState) => state.employeesList
 
 export const selectEmployeeById = createSelector(
   (state: RootState, id: number) => ({ employeesList: selectAllEmployees(state), id }),

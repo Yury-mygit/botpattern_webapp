@@ -1,7 +1,25 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import {SessionsListInterface, SessionInterface} from "../interface";
+import {ServiceType} from "../interface";
 
-const initialState: SessionsListInterface = [
+export interface SessionInterface {
+  id: number;
+  startDateTime: string;
+  duration: number; // in minute
+  week_first_day: string;
+  student_id: number; // ID of the Student
+  employee_id: number; // ID of the Specialist
+  office_id: number; // ID of the Office
+  serviceType: ServiceType;
+  performed: boolean;
+  paid: boolean;
+  online: boolean;
+  confirmed: boolean;
+  repeatable: boolean;
+  notes: string;
+  status: string; // Could be an enum if there's a fixed set of statuses
+}
+
+const initialState: SessionInterface[] = [
     {
         'id': 1001,
         'startDateTime': new Date(2023, 10, 14, 13, 0, 0).toString(),
@@ -11,7 +29,7 @@ const initialState: SessionsListInterface = [
         "paid": true,
         "confirmed": true,
         "student_id": 1,
-        "specialist_id": 1,
+        "employee_id": 1,
         "repeatable": true,
         "notes": '',
         "office_id": 1,
@@ -28,7 +46,7 @@ const initialState: SessionsListInterface = [
         "paid": true,
         "confirmed": true,
         "student_id": 2,
-        "specialist_id": 1,
+        "employee_id": 1,
         "repeatable": true,
         "notes": '',
         "office_id": 1,
@@ -45,7 +63,7 @@ const initialState: SessionsListInterface = [
         "paid": true,
         "confirmed": true,
         "student_id": 3,
-        "specialist_id": 1,
+        "employee_id": 1,
         "repeatable": true,
         "notes": '',
         "office_id": 1,
@@ -64,17 +82,13 @@ const sessionsSlice = createSlice({
       state.push(action.payload);
     },
 
-
-
-      updateSession: (state, action: PayloadAction<{ id: number; newSessionData: Partial<SessionInterface> }>) => {
-        const sessionIndex = state.findIndex(session => session.id === action.payload.id);
-        if (sessionIndex !== -1) {
-          const newSessionData = { ...action.payload.newSessionData };
-          state[sessionIndex] = { ...state[sessionIndex], ...newSessionData };
-        }
-      },
-
-
+    updateSession: (state, action: PayloadAction<{ id: number; newSessionData: Partial<SessionInterface> }>) => {
+      const sessionIndex = state.findIndex(session => session.id === action.payload.id);
+      if (sessionIndex !== -1) {
+        const newSessionData = { ...action.payload.newSessionData };
+        state[sessionIndex] = { ...state[sessionIndex], ...newSessionData };
+      }
+    },
 
     deleteSession: (state, action: PayloadAction<number>) => {
       const sessionIndex = state.findIndex(session => session.id === action.payload);

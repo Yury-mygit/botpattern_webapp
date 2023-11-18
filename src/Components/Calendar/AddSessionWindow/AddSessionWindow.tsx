@@ -1,17 +1,15 @@
-// @flow
 import * as React from 'react';
 import {FaTimes} from "react-icons/fa";
-import {Sessions} from "../Interfases";
 import {useState} from "react";
-import {Session} from "../Interfases";
 import { FaSave, FaTrash } from 'react-icons/fa';
 import {addSession, updateSession, deleteSession} from "../../../store/sessions/sessionSlice";
-import {getSessionByDate} from "../../../store/sessions/sessionSelectors";
+import {getAllSessionOnWeek, getSessionByDate} from "../../../store/sessions/sessionSelectors";
 import {useSelector, useDispatch} from "react-redux";
 import {RootState} from "../../../store/store";
 import {selectAllStudents, selectStudentById} from "../../../store/students/studentSlice";
 import Select from 'react-select'
-import {StudentInterface} from "../../../store/interface";
+import {SessionInterface} from "../../../store/sessions/sessionSlice";
+import {selectAllEmployees} from './../../../store/employee/employeeSlice'
 
 
 interface SessionWindowParams {
@@ -22,30 +20,42 @@ interface Props  {
   handleClosePopup: () => void;
   isAddSessionWindowOpen:SessionWindowParams;
   setIsAddSessionWindowOpen:React.Dispatch<React.SetStateAction<SessionWindowParams | null>>
-  specialists? : string[]
 }
 const AddSessionWindow: React.FC<Props>  = ({
                                                 handleClosePopup,
                                                 isAddSessionWindowOpen,
                                                 setIsAddSessionWindowOpen,
-                                                specialists=['Ксения, Валентина']
 }) => {
+
+
+  const date = new Date();
+  const firstDayOfWeek = date.getDate() - date.getDay() + (date.getDay() === 0 ? -6 : 1); // Adjusted for Sunday being day 0
+  const firstDayDate = new Date(date.setDate(firstDayOfWeek));
+
+  const sessions : SessionInterface[] = useSelector((state: RootState) => getAllSessionOnWeek(state, firstDayDate));
+
 
   const dispatch = useDispatch();
   const students = useSelector(selectAllStudents);
-  const [selectedStudent, setSelectedStudent] = useState<StudentInterface>(students[0]);
-  const [windowState, setWindowState] = useState('session');
+  const employees = useSelector(selectAllEmployees);
+  // const sessions : SessionInterface[] = useSelector((state: RootState) => getAllSessionOnWeek(state));
+
+  // const [selectedStudent, setSelectedStudent] = useState<StudentInterface>(students[0]);
+  // const [windowState, setWindowState] = useState('session');
   const existingSession  = useSelector((state: RootState) => getSessionByDate(state, isAddSessionWindowOpen.date))
-  const student = useSelector(selectStudentById(selectedStudent.id));
 
   let newOptions = students.map(item=>{
-    return(
-      {
+    return({
         'value': item.id,
         'label': item.first_name
-      }
-    )
+      })
+  })
 
+  let newOptions2 = employees.map(item=>{
+    return({
+        'value': item.id,
+        'label': item.first_name
+      })
   })
 
   let targetDate :Date = isAddSessionWindowOpen.date
@@ -60,26 +70,21 @@ const AddSessionWindow: React.FC<Props>  = ({
     };
 
 
-  //  const handleStudentChange = (selectedOption: Option) => {
-  //   const selectedStudent = students.find(st => st.id === selectedOption.value);
-  //   if (selectedStudent) {
-  //     setSelectedStudent(selectedStudent);
-  //   } else {
-  //     // Handle the case where no student was found
-  //   }
-  // };
-
-
    interface Option {
     value: number;
     label: string;
   }
 
  const [selectedOption, setSelectedOption] = useState<Option | null>(null);
+ const [selectedOption2, setSelectedOption2] = useState<Option | null>(null);
 
 const handleChange = (selectedOption: Option | null) => {
   setSelectedOption(selectedOption);
-  console.log(selectedOption)
+  // console.log(selectedOption)
+};
+const handleChange2 = (selectedOption: Option | null) => {
+  setSelectedOption2(selectedOption2);
+  // console.log(selectedOption)
 };
 
   const handleDelete = () => {
@@ -104,7 +109,7 @@ const handleChange = (selectedOption: Option | null) => {
         "paid": true,
         "confirmed": true,
         "student_id": studentId== undefined? 0 : studentId.id,
-        "specialist_id": 1,
+        "employee_id": 1,
         "repeatable": true,
         "notes": '',
         "office_id": 1,
@@ -124,7 +129,7 @@ const handleChange = (selectedOption: Option | null) => {
 
 return (
   <div
-    className="win_wrap fixed w-full h-full top-0 left-0"
+    className="win_wrap absolute w-full h-full top-0 left-0"
     style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}}
     onClick={handleClosePopup}
   >
@@ -141,17 +146,30 @@ return (
         })}
         </h3>
       </div>
-      <div className="flex flex-row space-x-4 justify-between mb-4">
-          <Select
-            options={newOptions}
-            onChange={handleChange}
-            styles={{
-              container: (provided) => ({
-                ...provided,
-                width: '45%'
-              })
-            }}
-          />
+      <div className="flex flex-col space-x-4 justify-between mb-4">
+        <Select
+          options={newOptions}
+          defaultValue={newOptions[0]} // Set the first option as the default value
+          onChange={handleChange}
+          styles={{
+            container: (provided) => ({
+              ...provided,
+              width: '80%'
+            })
+          }}
+        />
+         <Select
+          options={newOptions2}
+          defaultValue={newOptions2[0]} // Set the first option as the default value
+          onChange={handleChange2}
+          styles={{
+            container: (provided) => ({
+              ...provided,
+              width: '45%',
+              padding: '0px',
+            })
+          }}
+        />
       </div>
       <div className="flex flex-row">
         <div className="mr-4"> {/* Lesson type radio buttons */}

@@ -1,5 +1,5 @@
 
-enum ServiceType {
+export enum ServiceType {
   SoundProduction,
   SpeechTherapyMassage,
   StutteringTreatment,
