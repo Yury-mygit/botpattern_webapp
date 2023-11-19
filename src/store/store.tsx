@@ -3,6 +3,9 @@ import studentsReducer from './students/studentSlice'
 import userReducer from './userSlice' // assuming you have these slices
 import sessionsReducer from './sessions/sessionSlice'
 import employeesListReducer from './employee/employeeSlice'
+
+import hourReducer from './HourSlice'
+
 import {studentApi} from "./students/QueryStydents";
 import { setupListeners } from '@reduxjs/toolkit/query'
 export const store = configureStore({
@@ -11,6 +14,7 @@ export const store = configureStore({
     user: userReducer,
     sessions: sessionsReducer,
     employeesList: employeesListReducer,
+    hour:hourReducer,
     [studentApi.reducerPath]: studentApi.reducer
   },
   middleware: (getDefaultMiddleware) =>

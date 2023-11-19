@@ -66,6 +66,8 @@ const AddSessionWindow: React.FC<Props>  = ({
   // const [windowState, setWindowState] = useState('session');
   const existingSession  = useSelector((state: RootState) => getSessionByDate(state, isAddSessionWindowOpen.date))
 
+  const selectedHourState = useSelector((state: RootState) => state.hour)
+console.log(selectedHourState)
 let targetDate :Date = isAddSessionWindowOpen.date
     targetDate.setHours(isAddSessionWindowOpen.hour)
   let session = useSelector((state: RootState) => {

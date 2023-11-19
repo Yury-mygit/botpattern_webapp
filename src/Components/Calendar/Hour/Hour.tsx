@@ -10,7 +10,8 @@ import {getSessionByDate} from '../../../store/sessions/sessionSelectors'
 import {SessionsListInterface, SessionInterface} from "../../../store/interface";
 import {RootState} from "../../../store/store";
 import {selectStudentById} from "../../../store/students/studentSlice";
-
+import {set} from "../../../store/HourSlice";
+import {HourState} from '../../../store/HourSlice'
 interface SessionWindowParams {
   hour: number;
   date: Date;
@@ -28,7 +29,7 @@ export const Hour: React.FC<Props> = ({
                           setIsAddSessionWindowOpen
       }) => {
 
-
+    // const hourDate = use
     let dragging = false;
 
 
@@ -102,6 +103,13 @@ export const Hour: React.FC<Props> = ({
       }
 
 
+      let aaa : HourState = {
+         value: hour,
+         date: JSON.stringify(date)
+      }
+
+
+
       const currentTime = new Date().getTime();
       const diffTime = currentTime - lastTap;
 
@@ -109,6 +117,7 @@ export const Hour: React.FC<Props> = ({
         // The current tap happened within 1 second of the last tap, schedule the window to open after 1 second
         setTimeout(() => {
           setIsAddSessionWindowOpen({'hour': hour,'date': date});
+          dispatch(set(aaa))
         }, 1000);
       }
 

@@ -7,19 +7,11 @@ Additionally, make a setting so that sessions can be linked not to every minute,
 
 import * as React from 'react';
 import Header from "../../Header/Header";
-import Footer from "../../../Footer/Footer";
-import type {RootState } from "../../../store/store";
-import { useSelector, useDispatch } from 'react-redux'
-import { setUser } from '../../../store/userSlice'
 import {useEffect, useState} from 'react';
-
-import { FaDollarSign, FaVideo, FaRetweet } from 'react-icons/fa';
-import { FaTimes } from 'react-icons/fa'; // Import the cross icon
-
-import {Session, Sessions} from "../Interfases";
 import Hour from '../Hour/Hour'
 import AddSessionWindow from "../AddSessionWindow/AddSessionWindow";
 import HourList from "./HourList";
+import {getHoursLine} from "../Hour/funcLib";
 
 type WeeklyCalendarProps = {
   selectedDay: Date | null;
@@ -44,6 +36,7 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
     const [currentWeek, setCurrentWeek] = React.useState(new Date());
 
     const currentDate = new Date();
+
     currentDate.setHours(0, 0, 0, 0); // Normalize to compare only year, month, and day
 
     const prevWeek = () => {
@@ -58,74 +51,61 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
 
     const days = [];
     for (let i = 0; i <= 6; i++) {
-    days.push(new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate() + i));
+       days.push(new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate() + i));
     }
 
-    function generateHours() {
-        const hours = [];
-        for (let i = 8; i <= 21; i++) {
-            hours.push(i);
-        }
-        return hours;
-    }
-
-    const hours = generateHours();
-    const generateCalendarDays = (daysArray: Date[]) => {
-        return daysArray.map((dayDate, index) => {
-            dayDate.setHours(0, 0, 0, 0); // Normalize to compare only year, month, and day
-
-            return (
-                <div className="flex flex-row" key={index}>
-
-                    <div>
-                        <div
-                            key={index}
-                            className={`flex flex-col w-12 h-8 border border-gray-500 items-center justify-center 
-                            ${dayDate < currentDate ? 'text-gray-400' : ''} ${dayDate.getTime() === selectedDay?.getTime() ? 'bg-blue-200' : ''}`}
-                            onClick={() => setSelectedDay(dayDate)}
-                        >
-                            {dayDate.getDate()}
-                        </div>
-
-                       <div className="HOUR flex flex-col">
-                            {hours.map(hour => {
-                              return (<Hour
-                                  key={`${dayDate.toString()}-${hour}`} // You have a key here
-                                  hour={hour}
-                                  date={dayDate}
-                                  setIsAddSessionWindowOpen={setIsAddSessionWindowOpen}
-                              />);
-                            })}
-                       </div>
-                    </div>
-                </div>
-            );
-        });
-    };
+    const hours = getHoursLine();
 
     return (
-      <div className="
-        callendar_wrapper
-        {/*w-96*/}
-        relative
-      ">
+      <div className="callendar_wrapper relative">
         <Header prevMonth={prevWeek} nextMonth={nextWeek} currentMonth={currentWeek}/>
         <div className="CALENDAR flex flex-row mb-16">
           <HourList hours={hours} />
           <div className="grid grid-cols-7 gap-1">
-            {generateCalendarDays(days)}
+            {
+              days.map((dayDate, index) => {
+                dayDate.setHours(0, 0, 0, 0); // Normalize to compare only year, month, and day
+                return (
+                  <div className="flex flex-row" key={index}>
+                    <div>
+                      <div
+                        key={index}
+                        className={`flex flex-col w-12 h-8 border border-gray-500 items-center justify-center 
+                          ${dayDate < currentDate ? 'text-gre-400' : ''} 
+                          ${dayDate.getTime() === selectedDay?.getTime() ? 'bg-blue-200' : ''}
+                          ${dayDate == currentDate ? 'font-bold' : ''}
+                        `}
+                        onClick={() => setSelectedDay(dayDate)}
+                      >
+                        {dayDate.getDate()}
+                      </div>
+                      <div className="HOUR flex flex-col">
+                        {hours.map(hour => {
+                          return (<Hour
+                            key={`${dayDate.toString()}-${hour}`} // You have a key here
+                            hour={hour}
+                            date={dayDate}
+                            setIsAddSessionWindowOpen={setIsAddSessionWindowOpen}
+                          />);
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })
+            }
           </div>
-            {isAddSessionWindowOpen!==null && (
-              <AddSessionWindow
-                  handleClosePopup={handleClosePopup}
-                  isAddSessionWindowOpen={isAddSessionWindowOpen}
-                  setIsAddSessionWindowOpen={setIsAddSessionWindowOpen}
-              />
-            )}
-
+          {isAddSessionWindowOpen!==null && (
+            <AddSessionWindow
+              handleClosePopup={handleClosePopup}
+              isAddSessionWindowOpen={isAddSessionWindowOpen}
+              setIsAddSessionWindowOpen={setIsAddSessionWindowOpen}
+            />
+          )}
         </div>
-      </div>
+     </div>
     );
+
 }
 
 
