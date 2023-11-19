@@ -1,5 +1,5 @@
 import React from 'react';
-import './App.css';
+import './scc/App.css';
 import {  MonthlyCalendar} from "./Components/Calendar/Monthly/Calendar" ;
 import {WeeklyCalendar} from "./Components/Calendar/Weekly/WeeklyCalendar";
 import { Outlet, Link } from "react-router-dom";

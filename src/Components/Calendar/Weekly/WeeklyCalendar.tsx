@@ -7,7 +7,7 @@ Additionally, make a setting so that sessions can be linked not to every minute,
 
 import * as React from 'react';
 import Header from "../../Header/Header";
-import Footer from "../../Footer/Footer";
+import Footer from "../../../Footer/Footer";
 import type {RootState } from "../../../store/store";
 import { useSelector, useDispatch } from 'react-redux'
 import { setUser } from '../../../store/userSlice'
@@ -104,7 +104,11 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
     };
 
     return (
-      <div className="callendar_wrapper w-96 relative">
+      <div className="
+        callendar_wrapper
+        {/*w-96*/}
+        relative
+      ">
         <Header prevMonth={prevWeek} nextMonth={nextWeek} currentMonth={currentWeek}/>
         <div className="CALENDAR flex flex-row mb-16">
           <HourList hours={hours} />

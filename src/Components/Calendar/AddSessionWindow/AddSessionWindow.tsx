@@ -12,6 +12,9 @@ import {SessionInterface} from "../../../store/sessions/sessionSlice";
 import {selectAllEmployees} from './../../../store/employee/employeeSlice'
 
 
+import { useGetStudentByidQuery, useGetAllStudentsQuery } from "../../../store/students/QueryStydents";
+import {StudentInterface} from "../../../store/interface";
+
 interface SessionWindowParams {
   hour: number;
   date: Date;
@@ -36,7 +39,26 @@ const AddSessionWindow: React.FC<Props>  = ({
 
 
   const dispatch = useDispatch();
-  const students = useSelector(selectAllStudents);
+
+
+  // const students = useSelector(selectAllStudents);
+
+  let students1: StudentInterface[] | undefined
+  const {
+    data,
+    isFetching,
+    isLoading,
+  } = useGetAllStudentsQuery()
+
+  // console.log(data)
+   React.useEffect(() => {
+    // if(!isFetching){
+      // console.log(data, students)
+      students1 = data
+
+    // }
+  }, [data]);
+
   const employees = useSelector(selectAllEmployees);
   // const sessions : SessionInterface[] = useSelector((state: RootState) => getAllSessionOnWeek(state));
 
@@ -44,7 +66,22 @@ const AddSessionWindow: React.FC<Props>  = ({
   // const [windowState, setWindowState] = useState('session');
   const existingSession  = useSelector((state: RootState) => getSessionByDate(state, isAddSessionWindowOpen.date))
 
-  let newOptions = students.map(item=>{
+let targetDate :Date = isAddSessionWindowOpen.date
+    targetDate.setHours(isAddSessionWindowOpen.hour)
+  let session = useSelector((state: RootState) => {
+    return getSessionByDate(state, targetDate)
+  })
+
+  const [selectedOption, setSelectedOption] = useState<Option | null>(null);
+ const [selectedOption2, setSelectedOption2] = useState<Option | null>(null);
+
+console.log(data)
+ if (data==undefined) {
+   return (<div>sdsdsd</div>)
+ }
+students1=data
+
+  let newOptions = students1.map(item=>{
     return({
         'value': item.id,
         'label': item.first_name
@@ -58,12 +95,9 @@ const AddSessionWindow: React.FC<Props>  = ({
       })
   })
 
-  let targetDate :Date = isAddSessionWindowOpen.date
-    targetDate.setHours(isAddSessionWindowOpen.hour)
 
-  let session = useSelector((state: RootState) => {
-    return getSessionByDate(state, targetDate)
-  })
+
+
 
   const handleInnerDivClick = (e: React.MouseEvent):void => {
       e.stopPropagation(); // Prevent the click event from propagating to the win_wrap div
@@ -75,8 +109,6 @@ const AddSessionWindow: React.FC<Props>  = ({
     label: string;
   }
 
- const [selectedOption, setSelectedOption] = useState<Option | null>(null);
- const [selectedOption2, setSelectedOption2] = useState<Option | null>(null);
 
 const handleChange = (selectedOption: Option | null) => {
   setSelectedOption(selectedOption);
@@ -97,8 +129,11 @@ const handleChange2 = (selectedOption: Option | null) => {
     let targetDate :Date = isAddSessionWindowOpen.date
     targetDate.setHours(isAddSessionWindowOpen.hour)
 
-    if (selectedOption !== null) {
-      const studentId = students.find(item => item.id === selectedOption.value);
+
+    // const studentId = students1.find(item => item.id === selectedOption.value);
+
+    if (selectedOption !== null && students1) {
+      const studentId = students1.find(item => item.id === selectedOption.value);
 
       dispatch(addSession( {
         'id': 1001,
