@@ -12,6 +12,7 @@ export const studentApi = createApi({
     getAllStudents: builder.query<StudentInterface[], void>({
       query: () => `students`,
     }),
+
     addStudent: builder.mutation<StudentInterface, Partial<StudentInterface>>({
       query: (newStudent) => ({
         url: 'students',

@@ -12,6 +12,8 @@ import Hour from '../Hour/Hour'
 import AddSessionWindow from "../AddSessionWindow/AddSessionWindow";
 import HourList from "./HourList";
 import {getHoursLine} from "../Hour/funcLib";
+import {useGetAllSessionsQuery} from "../../../store/sessions/sessionAPI";
+import {SessionInterface} from "../../../store/interface";
 
 type WeeklyCalendarProps = {
   selectedDay: Date | null;
@@ -28,7 +30,10 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
       hour: number;
       date: Date;
     }
+    const {data, error, isLoading} = useGetAllSessionsQuery();
+    const globalSessions = data as SessionInterface[] | undefined;
 
+    // console.log(data)
     const handleClosePopup = () => setIsAddSessionWindowOpen(null)
 
     const [isAddSessionWindowOpen, setIsAddSessionWindowOpen] = useState<SessionWindowParams|null>(null)
@@ -56,6 +61,16 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
 
     const hours = getHoursLine();
 
+    if (globalSessions == undefined) return (<div></div>)
+
+const getSession = (hour: number, day: Date): SessionInterface | undefined => {
+  day.setHours(hour);
+  return globalSessions.find((session: SessionInterface) => {
+    const sessionDate = new Date(session.startDateTime.replace(' ', 'T'));
+    return sessionDate.getTime() === day.getTime();
+  });
+}
+
     return (
       <div className="callendar_wrapper relative">
         <Header prevMonth={prevWeek} nextMonth={nextWeek} currentMonth={currentWeek}/>
@@ -81,11 +96,13 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
                       </div>
                       <div className="HOUR flex flex-col">
                         {hours.map(hour => {
+                          // console.log(hour, '   ', dayDate, typeof dayDate)
                           return (<Hour
                             key={`${dayDate.toString()}-${hour}`} // You have a key here
                             hour={hour}
                             date={dayDate}
                             setIsAddSessionWindowOpen={setIsAddSessionWindowOpen}
+                            session ={getSession(hour, dayDate)}
                           />);
                         })}
                       </div>

@@ -2,6 +2,8 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { useGetStudentByidQuery, useGetAllStudentsQuery } from "../store/students/QueryStydents";
+import Line from './Line'
+import {StudentInterface} from "../store/interface";
 
 type Props = {
 
@@ -9,45 +11,46 @@ type Props = {
 
 export const StudentsView = (props: Props) => {
   const [id, setId] = useState('');
-  const [studentData, setStudentData] = useState('');
   const [allStudentsData, setAllStudentsData] = useState<string | null>(null);
-  const [shouldFetchAllStudents, setShouldFetchAllStudents] = useState(false);
-
-  const {
-    data: studentDataById,
-    error,
-    isLoading
-  } = useGetStudentByidQuery(id)
-
-  const {
-    data: allStudentsDataFromQuery,
-  } = useGetAllStudentsQuery(undefined, {
-    skip: !shouldFetchAllStudents
-  });
-
-  const Handler = () => {
-    if(studentDataById){
-      setStudentData(JSON.stringify(studentDataById));
-    }
-  }
+  const [shouldFetchAllStudents, setShouldFetchAllStudents] = useState(true);
+  const {data: allStudentsDataFromQuery,} = useGetAllStudentsQuery(undefined, {skip: !shouldFetchAllStudents});
 
   const HandlerAll = () => {
     setShouldFetchAllStudents(true);
   }
 
   React.useEffect(() => {
-    if(allStudentsDataFromQuery){
+    if (allStudentsDataFromQuery) {
       setAllStudentsData(JSON.stringify(allStudentsDataFromQuery));
     }
   }, [allStudentsDataFromQuery]);
 
+  if (allStudentsDataFromQuery == undefined) return <div> loading </div>
+
+  // console.log(allStudentsDataFromQuery.map(item => item.first_name))
+
+interface extended extends StudentInterface {
+  session_available: any; // replace 'any' with the actual type of 'session_available'
+}
+
   return (
     <div>
-      <input type="text" value={id} onChange={(e) => setId(e.target.value)} />
-      <button onClick={()=>Handler()}>Load Student Data</button>
-      <textarea value={studentData} readOnly className="border-2"/>
-      <button onClick={()=>HandlerAll()}>Load All Students Data</button>
-      <div>{allStudentsData}</div>
+      <div>
+
+        <div className="flex flex-row justify-center mb-5">
+
+          <div className="flex flex-row justify-center w-2/4 border-2">Name</div>
+          <div className="flex flex-row justify-center w-1/4 border-2">Status</div>
+          <div className="flex flex-row justify-center w-1/4 border-2">Sessions</div>
+
+        </div>
+        <div>
+            {allStudentsDataFromQuery.map((item): JSX.Element => (
+               <Line key={item.id} item={item as extended}></Line>
+            ))}
+        </div>
+
+      </div>
     </div>
   );
-};
+}

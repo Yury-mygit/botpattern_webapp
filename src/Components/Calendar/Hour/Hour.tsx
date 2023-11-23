@@ -21,14 +21,16 @@ interface Props  {
   hour: number;
   date: Date;
   setIsAddSessionWindowOpen: (params: SessionWindowParams) => void; // Use the SessionWindowParams type here
+  session?: SessionInterface
 }
 
 export const Hour: React.FC<Props> = ({
                           hour,
                           date,
-                          setIsAddSessionWindowOpen
+                          setIsAddSessionWindowOpen,
+                          session
       }) => {
-
+    console.log(session)
     // const hourDate = use
     let dragging = false;
 
@@ -142,7 +144,7 @@ export const Hour: React.FC<Props> = ({
 
 >
 
-            {session1 &&
+            {session &&
               <div style={{
                 position: 'absolute',
                 top: 0,
@@ -156,13 +158,13 @@ export const Hour: React.FC<Props> = ({
               }}
               >
                 <FaDollarSign style={{
-                  color: session1.paid ? 'green' : 'red'
+                  color: session.paid ? 'green' : 'red'
                 }}/>
                 <FaVideo style={{
-                  color: session1.online ? 'blue' : 'gray'
+                  color: session.online ? 'blue' : 'gray'
                 }}/>
                 <FaRetweet style={{
-                  color: session1.repeatable ? 'orange' : 'gray'
+                  color: session.repeatable ? 'orange' : 'gray'
                 }}/>
               </div>
         }
