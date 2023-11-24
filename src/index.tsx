@@ -16,6 +16,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import {StudentsView} from "./students/StudentsView";
+import Employess from "./employee/Employess";
 
 interface User {
   id: number;
@@ -45,7 +46,7 @@ function getRoutesForUser(user: User) {
       },
       {
         path: "employees",
-        element:<div> employees in process</div>,
+        element:<Employess/>,
         errorElement:<h1 className="flex align-middle justify-center">Возникла ошибка</h1>,
       },
       {

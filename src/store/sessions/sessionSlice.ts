@@ -9,7 +9,27 @@ export interface SessionInterface {
   student_id: number; // ID of the Student
   employee_id: number; // ID of the Specialist
   office_id: number; // ID of the Office
-  serviceType: ServiceType;
+  // serviceType: ServiceType;
+  serviceType: number;
+  performed: boolean;
+  paid: boolean;
+  online: boolean;
+  confirmed: boolean;
+  repeatable: boolean;
+  notes: string;
+  status: string; // Could be an enum if there's a fixed set of statuses
+}
+
+export interface SessionInterfaceCrete {
+
+  startDateTime: string;
+  duration: number; // in minute
+  week_first_day: string;
+  student_id: number; // ID of the Student
+  employee_id: number; // ID of the Specialist
+  office_id: number; // ID of the Office
+  // serviceType: ServiceType;
+  serviceType: number;
   performed: boolean;
   paid: boolean;
   online: boolean;
