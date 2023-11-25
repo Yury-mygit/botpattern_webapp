@@ -3,40 +3,6 @@ import {SessionInterface} from "./sessionSlice";
 import {ServiceType} from "../interface";
 
 
-// {
-//   "startDateTime": "string",
-//   "duration": 0,
-//   "week_first_day": "string",
-//   "online": true,
-//   "paid": true,
-//   "confirmed": true,
-//   "student_id": 0,
-//   "employee_id": 0,
-//   "repeatable": true,
-//   "notes": "string",
-//   "office_id": 0,
-//   "performed": true,
-//   "serviceType": "string",
-//   "status": "string"
-// }
-//
-// export interface SessionInterface {
-//   id: number;
-//   startDateTime: string;
-//   duration: number; // in minute
-//   week_first_day: string;
-//   student_id: number; // ID of the Student
-//   employee_id: number; // ID of the Specialist
-//   office_id: number; // ID of the Office
-//   serviceType: ServiceType;
-//   performed: boolean;
-//   paid: boolean;
-//   online: boolean;
-//   confirmed: boolean;
-//   repeatable: boolean;
-//   notes: string;
-//   status: string; // Could be an enum if there's a fixed set of statuses
-// }
 
 // Define a service using a base URL and expected endpoints
 export const sessionAPI = createApi({
@@ -44,12 +10,16 @@ export const sessionAPI = createApi({
   tagTypes:['sessions'],
   baseQuery: fetchBaseQuery({ baseUrl: 'http://127.0.0.1:8000' }),
   endpoints: (builder) => ({
-
+    getSessionById: builder.query<SessionInterface, string>({
+      query: (id) => `sessions/${id}`,
+      providesTags: ['sessions'],
+    }),
     getAllSessions: builder.query<SessionInterface, void>({
 
       query: () => `sessions`,
+      providesTags: ['sessions'],
     }),
-    updatePost: builder.mutation<SessionInterface, Partial<SessionInterface>>({
+    updateSessions: builder.mutation<SessionInterface, Partial<SessionInterface>>({
       // note: an optional `queryFn` may be used in place of `query`
       query: ({ ...patch }) => ({
         url: `sessions`,
@@ -100,6 +70,7 @@ export const sessionAPI = createApi({
 // auto-generated based on the defined endpoints
 export const {
   useGetAllSessionsQuery,
-  useUpdatePostMutation,
-  useCreateSessionMutation
+  useUpdateSessionsMutation,
+  useCreateSessionMutation,
+  useGetSessionByIdQuery
 } = sessionAPI

@@ -1,6 +1,6 @@
 // @flow
 import * as React from 'react';
-import {useCreateSessionMutation, useUpdatePostMutation} from "../store/sessions/sessionAPI";
+import {useCreateSessionMutation, useGetSessionByIdQuery, useUpdateSessionsMutation} from "../store/sessions/sessionAPI";
 import {SessionInterface, SessionInterfaceCrete} from "../store/sessions/sessionSlice";
 import {ServiceType} from "../store/interface";
 
@@ -45,7 +45,10 @@ let dataforcreate : SessionInterfaceCrete = {
 
 function Employess(props: Props) {
 
-  const [updateSesion, { isLoading: isUpdating }] = useUpdatePostMutation()
+  const { data: session, isLoading, isError, error } = useGetSessionByIdQuery('1653');
+
+
+  const [updateSesion, { isLoading: isUpdating }] = useUpdateSessionsMutation()
   const [createSession, {data, isLoading: isCreating }] = useCreateSessionMutation()
 
   const handler = () => {
@@ -56,11 +59,12 @@ function Employess(props: Props) {
   }
 
   const show = () => {
-    console.log(data)
+    console.log(data, session)
   }
 
   return (
     <div>
+        <h1>{session? session.id:""}</h1>
         <button onClick={()=>handler()} className="bg-cyan-400" >update session</button>
         <button onClick={()=>create()} className="bg-cyan-400 m-5" >create</button>
         <button onClick={()=>show()} className="bg-cyan-400 m-5" >show</button>

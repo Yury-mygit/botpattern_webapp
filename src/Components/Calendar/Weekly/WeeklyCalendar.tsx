@@ -14,6 +14,7 @@ import HourList from "./HourList";
 import {getHoursLine} from "../Hour/funcLib";
 import {useGetAllSessionsQuery} from "../../../store/sessions/sessionAPI";
 import {SessionInterface} from "../../../store/interface";
+import {useGetAllStudentsQuery} from "../../../store/students/QueryStydents";
 
 type WeeklyCalendarProps = {
   selectedDay: Date | null;
@@ -33,8 +34,18 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
     const {data, error, isLoading} = useGetAllSessionsQuery();
     const globalSessions = data as SessionInterface[] | undefined;
 
+    const {data: stud, error: studEr, isLoading: il} = useGetAllStudentsQuery()
+    const globalstudents = stud as SessionInterface | undefined
     // console.log(data)
     const handleClosePopup = () => setIsAddSessionWindowOpen(null)
+
+    const checkSession = (date: Date): SessionInterface | undefined => {
+      if (globalSessions == undefined) return undefined;
+
+      let ses = globalSessions.find(s => new Date(s.startDateTime).getTime() === date.getTime());
+
+      return ses ? ses : undefined;
+    }
 
     const [isAddSessionWindowOpen, setIsAddSessionWindowOpen] = useState<SessionWindowParams|null>(null)
 
@@ -70,6 +81,10 @@ const getSession = (hour: number, day: Date): SessionInterface | undefined => {
     return sessionDate.getTime() === day.getTime();
   });
 }
+const getStudent = (id: number) => {
+  return stud != undefined  ? stud.find(i => i.id === id) : undefined;
+}
+
 
     return (
       <div className="callendar_wrapper relative">
@@ -94,18 +109,23 @@ const getSession = (hour: number, day: Date): SessionInterface | undefined => {
                       >
                         {dayDate.getDate()}
                       </div>
-                      <div className="HOUR flex flex-col">
-                        {hours.map(hour => {
-                          // console.log(hour, '   ', dayDate, typeof dayDate)
-                          return (<Hour
-                            key={`${dayDate.toString()}-${hour}`} // You have a key here
-                            hour={hour}
-                            date={dayDate}
-                            setIsAddSessionWindowOpen={setIsAddSessionWindowOpen}
-                            session ={getSession(hour, dayDate)}
-                          />);
-                        })}
-                      </div>
+                        <div className="HOUR flex flex-col">
+                          {hours.map(hour => {
+                            // console.log(hour, '   ', dayDate, typeof dayDate)
+                            let s = getSession(hour, dayDate)
+                            let st2 = s?.student_id !== undefined ? getStudent(s.student_id) : undefined;
+
+                            return (<Hour
+                              key={`${dayDate.toString()}-${hour}`} // You have a key here
+                              hour={hour}
+                              date={dayDate}
+                              setIsAddSessionWindowOpen={setIsAddSessionWindowOpen}
+                              session = {s}
+                              styde = {st2}
+                              checkSession ={checkSession}
+                            />);
+                          })}
+                        </div>
                     </div>
                   </div>
                 )
