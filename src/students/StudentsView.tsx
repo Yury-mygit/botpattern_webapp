@@ -1,7 +1,7 @@
 // @flow 
 import * as React from 'react';
 import { useState } from 'react';
-import { useGetStudentByidQuery, useGetAllStudentsQuery } from "../store/students/QueryStydents";
+import { useGetStudentByidQuery, useGetAllStudentsQuery } from "../store/students/studentAPI";
 import Line from './Line'
 import {StudentInterface} from "../store/interface";
 

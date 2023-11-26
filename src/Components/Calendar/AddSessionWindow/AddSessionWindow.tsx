@@ -8,12 +8,17 @@ import {useSelector, useDispatch} from "react-redux";
 import {RootState} from "../../../store/store";
 import {selectAllStudents, selectStudentById} from "../../../store/students/studentSlice";
 import Select from 'react-select'
-import {SessionInterface} from "../../../store/sessions/sessionSlice";
+import {EmployeeInterface, SessionInterface} from "../../../store/interface";
 import {selectAllEmployees} from './../../../store/employee/employeeSlice'
+import {
+  useCreateSessionMutation,
+  useDeleteSessionMutation,
+  useUpdateSessionsMutation
+} from "../../../store/sessions/sessionAPI";
 
-
-import { useGetStudentByidQuery, useGetAllStudentsQuery } from "../../../store/students/QueryStydents";
+import { useGetStudentByidQuery, useGetAllStudentsQuery } from "../../../store/students/studentAPI";
 import {StudentInterface} from "../../../store/interface";
+import hour from "../Hour/Hour";
 
 interface SessionWindowParams {
   hour: number;
@@ -23,79 +28,54 @@ interface Props  {
   handleClosePopup: () => void;
   isAddSessionWindowOpen:SessionWindowParams;
   setIsAddSessionWindowOpen:React.Dispatch<React.SetStateAction<SessionWindowParams | null>>
+  students:StudentInterface[]
+  employeesList:EmployeeInterface[]
+  getSession:(hour: number, day: Date)=>SessionInterface | undefined
+  getEmployees:(hour: number, day:Date)=>EmployeeInterface | undefined
 }
 const AddSessionWindow: React.FC<Props>  = ({
-                                                handleClosePopup,
-                                                isAddSessionWindowOpen,
-                                                setIsAddSessionWindowOpen,
+    handleClosePopup,
+    isAddSessionWindowOpen,
+    setIsAddSessionWindowOpen,
+    students,
+    getSession,
+    employeesList
 }) => {
 
 
   const date = new Date();
   const firstDayOfWeek = date.getDate() - date.getDay() + (date.getDay() === 0 ? -6 : 1); // Adjusted for Sunday being day 0
   const firstDayDate = new Date(date.setDate(firstDayOfWeek));
-
-  const sessions : SessionInterface[] = useSelector((state: RootState) => getAllSessionOnWeek(state, firstDayDate));
-
-
   const dispatch = useDispatch();
-
-
-  // const students = useSelector(selectAllStudents);
-
-  let students1: StudentInterface[] | undefined
-  const {
-    data,
-    isFetching,
-    isLoading,
-  } = useGetAllStudentsQuery()
-
-  // console.log(data)
-   React.useEffect(() => {
-    // if(!isFetching){
-      // console.log(data, students)
-      students1 = data
-
-    // }
-  }, [data]);
-
   const employees = useSelector(selectAllEmployees);
-  // const sessions : SessionInterface[] = useSelector((state: RootState) => getAllSessionOnWeek(state));
-
-  // const [selectedStudent, setSelectedStudent] = useState<StudentInterface>(students[0]);
-  // const [windowState, setWindowState] = useState('session');
-  const existingSession  = useSelector((state: RootState) => getSessionByDate(state, isAddSessionWindowOpen.date))
 
   const selectedHourState = useSelector((state: RootState) => state.hour)
-console.log(selectedHourState)
-let targetDate :Date = isAddSessionWindowOpen.date
+
+  let targetDate :Date = isAddSessionWindowOpen.date
     targetDate.setHours(isAddSessionWindowOpen.hour)
   let session = useSelector((state: RootState) => {
     return getSessionByDate(state, targetDate)
   })
-
-  const [selectedOption, setSelectedOption] = useState<Option | null>(null);
- const [selectedOption2, setSelectedOption2] = useState<Option | null>(null);
-
-console.log(data)
- if (data==undefined) {
-   return (<div>sdsdsd</div>)
- }
-students1=data
-
-  let newOptions = students1.map(item=>{
+  let newOptions = students.map(item=>{
     return({
         'value': item.id,
         'label': item.first_name
       })
   })
 
-  let newOptions2 = employees.map(item=>{
+  let newOptions2 = employeesList.map(item=>{
     return({
         'value': item.id,
         'label': item.first_name
       })
   })
+
+  const [selectedOption, setSelectedOption] = useState<Option | null>(newOptions[0]);
+  const [selectedOption2, setSelectedOption2] = useState<Option | null>(null);
+
+  const [createSession, {isLoading, isError, error}] = useCreateSessionMutation()
+  const [updateSession, {isLoading : isl, isError: isErr, error: errr}] = useUpdateSessionsMutation()
+
 
 
 
@@ -112,56 +92,57 @@ students1=data
   }
 
 
-const handleChange = (selectedOption: Option | null) => {
-  setSelectedOption(selectedOption);
-  // console.log(selectedOption)
-};
-const handleChange2 = (selectedOption: Option | null) => {
-  setSelectedOption2(selectedOption2);
-  // console.log(selectedOption)
-};
+  const handleChange = (selectedOption: Option | null) => {
+    setSelectedOption(selectedOption);
+    // console.log(selectedOption)
+  };
+  const handleChange2 = (selectedOption: Option | null) => {
+    setSelectedOption2(selectedOption2);
+    // console.log(selectedOption)
+  };
 
-  const handleDelete = () => {
-      console.log('sdsdsds')
-  }
-
-
-   const save = () => {
-  if (existingSession === undefined) {
-    let targetDate :Date = isAddSessionWindowOpen.date
-    targetDate.setHours(isAddSessionWindowOpen.hour)
-
-
-    // const studentId = students1.find(item => item.id === selectedOption.value);
-
-    if (selectedOption !== null && students1) {
-      const studentId = students1.find(item => item.id === selectedOption.value);
-
-      dispatch(addSession( {
-        'id': 1001,
-        'startDateTime': targetDate.toISOString(),
-        'duration':30,
-        'week_first_day': new Date(2023, 10, 13,0,0,0).toString(),
-        "online": false,
-        "paid": true,
-        "confirmed": true,
-        "student_id": studentId== undefined? 0 : studentId.id,
-        "employee_id": 1,
-        "repeatable": true,
-        "notes": '',
-        "office_id": 1,
-        "performed": true,
-        "serviceType":0,
-        "status":"done"
-      }));
+    const handleDelete = () => {
+        console.log('sdsdsds')
     }
-  } else {
-    // Update existing session
-    dispatch(updateSession({id: existingSession.id, newSessionData: existingSession}));
-  }
 
-  setIsAddSessionWindowOpen(null);
-};
+  const save = (hour: number, day:Date) => {
+
+    if (getSession(hour, day) === undefined) {
+      let targetDate :Date = isAddSessionWindowOpen.date
+      targetDate.setHours(isAddSessionWindowOpen.hour)
+
+       console.log(selectedOption)
+      if (selectedOption !== null && students) {
+        const studentId = students.find(item => item.id === selectedOption.value);
+        // const e
+
+        createSession( {
+          'id': 1001,
+          'startDateTime': targetDate.toISOString(),
+          'duration':30,
+          'week_first_day': new Date(2023, 10, 13,0,0,0).toString(),
+          "online": false,
+          "paid": true,
+          "confirmed": true,
+          "student_id": studentId== undefined? 0 : studentId.id,
+          "employee_id": 106,
+          "repeatable": true,
+          "notes": '',
+          "office_id": 139,
+          "performed": true,
+          "serviceType":0,
+          "status":"done"
+        });
+      }
+    } else {
+      // Update existing session
+      // dispatch(updateSession({id: existingSession.id, newSessionData: existingSession}));
+    }
+
+    setIsAddSessionWindowOpen(null);
+  };
+
+
 
 
 return (
@@ -228,7 +209,7 @@ return (
       </div>
       <textarea className="w-full mt-4" placeholder="Comments"></textarea> {/* Comments text area */}
       <div className="flex justify-between mt-4"> {/* Container for the buttons */}
-        <button className="w-1/2 mr-2" onClick={save}> {/* Save button */}
+        <button className="w-1/2 mr-2" onClick={()=>save(isAddSessionWindowOpen.hour, isAddSessionWindowOpen.date)}> {/* Save button */}
           <FaSave/> {/* Save icon */}
         </button>
         <button className="w-1/2 ml-2" onClick={handleDelete}> {/* Delete button */}

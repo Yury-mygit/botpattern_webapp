@@ -63,6 +63,13 @@ export const sessionAPI = createApi({
       }),
        invalidatesTags: ['sessions'],
     }),
+    deleteSession: builder.mutation<SessionInterface, Partial<SessionInterface>>({
+      query: (id) => ({
+        url: `sessions/${id}`,
+        method: 'DELETE',
+      }),
+       invalidatesTags: ['sessions'],
+    }),
   }),
 })
 
@@ -72,5 +79,6 @@ export const {
   useGetAllSessionsQuery,
   useUpdateSessionsMutation,
   useCreateSessionMutation,
-  useGetSessionByIdQuery
+  useGetSessionByIdQuery,
+  useDeleteSessionMutation
 } = sessionAPI

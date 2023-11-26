@@ -13,8 +13,9 @@ import AddSessionWindow from "../AddSessionWindow/AddSessionWindow";
 import HourList from "./HourList";
 import {getHoursLine} from "../Hour/funcLib";
 import {useGetAllSessionsQuery} from "../../../store/sessions/sessionAPI";
-import {SessionInterface} from "../../../store/interface";
-import {useGetAllStudentsQuery} from "../../../store/students/QueryStydents";
+import {SessionInterface, StudentInterface} from "../../../store/interface";
+import {useGetAllStudentsQuery} from "../../../store/students/studentAPI";
+import {useGetAllEmployeesQuery, useGetEmployeeByidQuery} from "../../../store/employee/employeeAPI";
 
 type WeeklyCalendarProps = {
   selectedDay: Date | null;
@@ -31,12 +32,17 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
       hour: number;
       date: Date;
     }
+
     const {data, error, isLoading} = useGetAllSessionsQuery();
     const globalSessions = data as SessionInterface[] | undefined;
 
     const {data: stud, error: studEr, isLoading: il} = useGetAllStudentsQuery()
-    const globalstudents = stud as SessionInterface | undefined
-    // console.log(data)
+    const globalstudents = stud as StudentInterface[] | undefined
+
+    const {data: emp, error: empEr , isLoading: empLoading} = useGetAllEmployeesQuery()
+    const employeesList = emp !== undefined ? emp : []
+
+
     const handleClosePopup = () => setIsAddSessionWindowOpen(null)
 
     const checkSession = (date: Date): SessionInterface | undefined => {
@@ -74,17 +80,25 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
 
     if (globalSessions == undefined) return (<div></div>)
 
-const getSession = (hour: number, day: Date): SessionInterface | undefined => {
-  day.setHours(hour);
-  return globalSessions.find((session: SessionInterface) => {
-    const sessionDate = new Date(session.startDateTime.replace(' ', 'T'));
-    return sessionDate.getTime() === day.getTime();
-  });
-}
-const getStudent = (id: number) => {
-  return stud != undefined  ? stud.find(i => i.id === id) : undefined;
-}
+    const getSession = (hour: number, day: Date): SessionInterface | undefined => {
+      day.setHours(hour);
+      return globalSessions.find((session: SessionInterface) => {
+        const sessionDate = new Date(session.startDateTime.replace(' ', 'T'));
+        return sessionDate.getTime() === day.getTime();
+      });
+    }
 
+    const getStudent = (hour: number, day: Date ) => {
+       let session = getSession(hour, day)
+       let s = stud != undefined  ? stud.find(i => i.id === session?.student_id) : undefined
+       return s !== undefined ? s : undefined
+    }
+
+    const getEmployees = (hour: number, day: Date ) => {
+       let session = getSession(hour, day)
+       let y = employeesList != undefined  ? employeesList.find(i => i.id === session?.specialist_id) : undefined
+       return y !== undefined ? y : undefined
+    }
 
     return (
       <div className="callendar_wrapper relative">
@@ -111,17 +125,13 @@ const getStudent = (id: number) => {
                       </div>
                         <div className="HOUR flex flex-col">
                           {hours.map(hour => {
-                            // console.log(hour, '   ', dayDate, typeof dayDate)
-                            let s = getSession(hour, dayDate)
-                            let st2 = s?.student_id !== undefined ? getStudent(s.student_id) : undefined;
-
                             return (<Hour
                               key={`${dayDate.toString()}-${hour}`} // You have a key here
                               hour={hour}
                               date={dayDate}
                               setIsAddSessionWindowOpen={setIsAddSessionWindowOpen}
-                              session = {s}
-                              styde = {st2}
+                              session = {getSession(hour, dayDate)}
+                              styde = {getStudent(hour, dayDate)}
                               checkSession ={checkSession}
                             />);
                           })}
@@ -137,6 +147,10 @@ const getStudent = (id: number) => {
               handleClosePopup={handleClosePopup}
               isAddSessionWindowOpen={isAddSessionWindowOpen}
               setIsAddSessionWindowOpen={setIsAddSessionWindowOpen}
+              students={globalstudents!==undefined ? globalstudents : []}
+              getSession={getSession}
+              getEmployees = {getEmployees}
+              employeesList={employeesList}
             />
           )}
         </div>

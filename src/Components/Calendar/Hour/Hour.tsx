@@ -12,7 +12,7 @@ import {RootState} from "../../../store/store";
 import {selectStudentById} from "../../../store/students/studentSlice";
 import {set} from "../../../store/HourSlice";
 import {HourState} from '../../../store/HourSlice'
-import {useGetStudentByidQuery} from "../../../store/students/QueryStydents";
+import {useGetStudentByidQuery} from "../../../store/students/studentAPI";
 import {StudentInterface} from '../../../store/interface'
 import {useUpdateSessionsMutation} from "../../../store/sessions/sessionAPI";
 interface SessionWindowParams {
