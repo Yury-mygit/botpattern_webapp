@@ -15,12 +15,12 @@ const Header: React.FC<HeaderProps> = ({ prevMonth, nextMonth, currentMonth }) =
       {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
     </div>
     <div>
-<IconButton onClick={prevMonth}>
-  <FaArrowLeft color="black" />
-</IconButton>
-<IconButton onClick={nextMonth}>
-  <FaArrowRight color="black" />
-</IconButton>
+    <IconButton onClick={prevMonth}>
+      <FaArrowLeft color="black" />
+    </IconButton>
+    <IconButton onClick={nextMonth}>
+      <FaArrowRight color="black" />
+    </IconButton>
     </div>
   </div>
 );

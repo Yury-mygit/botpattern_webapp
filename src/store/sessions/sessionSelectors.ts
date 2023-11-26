@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit';
-import {RootState} from "./store";
-import {SessionsListInterface, SessionInterface} from "./interface";
+import {RootState} from "../store";
+import {SessionInterface} from "./sessionSlice";
 
 export const selectSessions = (state: RootState) => state.sessions;
 
@@ -11,7 +11,7 @@ export const getAllSessionOnWeek = createSelector(
     endOfWeek.setDate(endOfWeek.getDate() + 7);
     return { startOfWeek, endOfWeek };
   },
-  (sessions: SessionsListInterface, { startOfWeek, endOfWeek }) =>
+  (sessions: SessionInterface[], { startOfWeek, endOfWeek }) =>
     sessions.filter(session => {
 
 
@@ -26,7 +26,7 @@ export const getAllSessionOnWeek = createSelector(
 export const getSessionById = createSelector(
   selectSessions,
   (state: RootState, sessionId: number) => sessionId,
-  (sessions: SessionsListInterface, sessionId) => sessions.find(session => session.id === sessionId)
+  (sessions: SessionInterface[], sessionId) => sessions.find(session => session.id === sessionId)
 );
 
 
@@ -34,7 +34,7 @@ export const getSessionById = createSelector(
 export const getSessionByDate = createSelector(
     selectSessions,
     (state: RootState, date: Date) => date,
-    (sessions: SessionsListInterface, date) => sessions.find(session =>{
+    (sessions: SessionInterface[], date) => sessions.find(session =>{
 
         const Idate = new Date(session.startDateTime)
 

@@ -26,8 +26,10 @@ docker run -v ${PWD}:/app -p 8080:80 calendar
 ```
 
 ```bash
-
+git status
 ```
+
+
 
 
 Promts

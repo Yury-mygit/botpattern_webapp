@@ -7,19 +7,15 @@ Additionally, make a setting so that sessions can be linked not to every minute,
 
 import * as React from 'react';
 import Header from "../../Header/Header";
-import Footer from "../../Footer/Footer";
-import type {RootState } from "../../../store/store";
-import { useSelector, useDispatch } from 'react-redux'
-import { setUser } from '../../../store/userSlice'
 import {useEffect, useState} from 'react';
-
-import { FaDollarSign, FaVideo, FaRetweet } from 'react-icons/fa';
-import { FaTimes } from 'react-icons/fa'; // Import the cross icon
-
-import {Session, Sessions} from "../Interfases";
 import Hour from '../Hour/Hour'
 import AddSessionWindow from "../AddSessionWindow/AddSessionWindow";
 import HourList from "./HourList";
+import {getHoursLine} from "../Hour/funcLib";
+import {useGetAllSessionsQuery} from "../../../store/sessions/sessionAPI";
+import {SessionInterface, StudentInterface} from "../../../store/interface";
+import {useGetAllStudentsQuery} from "../../../store/students/studentAPI";
+import {useGetAllEmployeesQuery, useGetEmployeeByidQuery} from "../../../store/employee/employeeAPI";
 
 type WeeklyCalendarProps = {
   selectedDay: Date | null;
@@ -37,13 +33,32 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
       date: Date;
     }
 
+    const {data, error, isLoading} = useGetAllSessionsQuery();
+    const globalSessions = data as SessionInterface[] | undefined;
+
+    const {data: stud, error: studEr, isLoading: il} = useGetAllStudentsQuery()
+    const globalstudents = stud as StudentInterface[] | undefined
+
+    const {data: emp, error: empEr , isLoading: empLoading} = useGetAllEmployeesQuery()
+    const employeesList = emp !== undefined ? emp : []
+
+
     const handleClosePopup = () => setIsAddSessionWindowOpen(null)
+
+    const checkSession = (date: Date): SessionInterface | undefined => {
+      if (globalSessions == undefined) return undefined;
+
+      let ses = globalSessions.find(s => new Date(s.startDateTime).getTime() === date.getTime());
+
+      return ses ? ses : undefined;
+    }
 
     const [isAddSessionWindowOpen, setIsAddSessionWindowOpen] = useState<SessionWindowParams|null>(null)
 
     const [currentWeek, setCurrentWeek] = React.useState(new Date());
 
     const currentDate = new Date();
+
     currentDate.setHours(0, 0, 0, 0); // Normalize to compare only year, month, and day
 
     const prevWeek = () => {
@@ -58,70 +73,90 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
 
     const days = [];
     for (let i = 0; i <= 6; i++) {
-    days.push(new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate() + i));
+       days.push(new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate() + i));
     }
 
-    function generateHours() {
-        const hours = [];
-        for (let i = 8; i <= 21; i++) {
-            hours.push(i);
-        }
-        return hours;
+    const hours = getHoursLine();
+
+    if (globalSessions == undefined) return (<div></div>)
+
+    const getSession = (hour: number, day: Date): SessionInterface | undefined => {
+      day.setHours(hour);
+      return globalSessions.find((session: SessionInterface) => {
+        const sessionDate = new Date(session.startDateTime.replace(' ', 'T'));
+        return sessionDate.getTime() === day.getTime();
+      });
     }
 
-    const hours = generateHours();
-    const generateCalendarDays = (daysArray: Date[]) => {
-        return daysArray.map((dayDate, index) => {
-            dayDate.setHours(0, 0, 0, 0); // Normalize to compare only year, month, and day
+    const getStudent = (hour: number, day: Date ) => {
+       let session = getSession(hour, day)
+       let s = stud != undefined  ? stud.find(i => i.id === session?.student_id) : undefined
+       return s !== undefined ? s : undefined
+    }
 
-            return (
-                <div className="flex flex-row" key={index}>
-
-                    <div>
-                        <div
-                            key={index}
-                            className={`flex flex-col w-12 h-8 border border-gray-500 items-center justify-center 
-                            ${dayDate < currentDate ? 'text-gray-400' : ''} ${dayDate.getTime() === selectedDay?.getTime() ? 'bg-blue-200' : ''}`}
-                            onClick={() => setSelectedDay(dayDate)}
-                        >
-                            {dayDate.getDate()}
-                        </div>
-
-                       <div className="HOUR flex flex-col">
-                            {hours.map(hour => {
-                              return (<Hour
-                                  key={`${dayDate.toString()}-${hour}`} // You have a key here
-                                  hour={hour}
-                                  date={dayDate}
-                                  setIsAddSessionWindowOpen={setIsAddSessionWindowOpen}
-                              />);
-                            })}
-                       </div>
-                    </div>
-                </div>
-            );
-        });
-    };
+    const getEmployees = (hour: number, day: Date ) => {
+       let session = getSession(hour, day)
+       let y = employeesList != undefined  ? employeesList.find(i => i.id === session?.specialist_id) : undefined
+       return y !== undefined ? y : undefined
+    }
 
     return (
-      <div className="callendar_wrapper w-96 relative">
+      <div className="callendar_wrapper relative">
         <Header prevMonth={prevWeek} nextMonth={nextWeek} currentMonth={currentWeek}/>
         <div className="CALENDAR flex flex-row mb-16">
           <HourList hours={hours} />
           <div className="grid grid-cols-7 gap-1">
-            {generateCalendarDays(days)}
+            {
+              days.map((dayDate, index) => {
+                dayDate.setHours(0, 0, 0, 0); // Normalize to compare only year, month, and day
+                return (
+                  <div className="flex flex-row" key={index}>
+                    <div>
+                      <div
+                        key={index}
+                        className={`flex flex-col w-12 h-8 border border-gray-500 items-center justify-center 
+                          ${dayDate < currentDate ? 'text-gre-400' : ''} 
+                          ${dayDate.getTime() === selectedDay?.getTime() ? 'bg-blue-200' : ''}
+                          ${dayDate == currentDate ? 'font-bold' : ''}
+                        `}
+                        onClick={() => setSelectedDay(dayDate)}
+                      >
+                        {dayDate.getDate()}
+                      </div>
+                        <div className="HOUR flex flex-col">
+                          {hours.map(hour => {
+                            return (<Hour
+                              key={`${dayDate.toString()}-${hour}`} // You have a key here
+                              hour={hour}
+                              date={dayDate}
+                              setIsAddSessionWindowOpen={setIsAddSessionWindowOpen}
+                              session = {getSession(hour, dayDate)}
+                              styde = {getStudent(hour, dayDate)}
+                              checkSession ={checkSession}
+                            />);
+                          })}
+                        </div>
+                    </div>
+                  </div>
+                )
+              })
+            }
           </div>
-            {isAddSessionWindowOpen!==null && (
-              <AddSessionWindow
-                  handleClosePopup={handleClosePopup}
-                  isAddSessionWindowOpen={isAddSessionWindowOpen}
-                  setIsAddSessionWindowOpen={setIsAddSessionWindowOpen}
-              />
-            )}
-
+          {isAddSessionWindowOpen!==null && (
+            <AddSessionWindow
+              handleClosePopup={handleClosePopup}
+              isAddSessionWindowOpen={isAddSessionWindowOpen}
+              setIsAddSessionWindowOpen={setIsAddSessionWindowOpen}
+              students={globalstudents!==undefined ? globalstudents : []}
+              getSession={getSession}
+              getEmployees = {getEmployees}
+              employeesList={employeesList}
+            />
+          )}
         </div>
-      </div>
+     </div>
     );
+
 }
 
 

@@ -6,7 +6,7 @@ import {useEffect, useState} from "react";
 
 import {useSelector, useDispatch} from "react-redux";
 
-import {getSessionByDate} from '../../../store/sessionSelectors'
+import {getSessionByDate} from '../../../store/sessions/sessionSelectors'
 import {SessionsListInterface, SessionInterface} from "../../../store/interface";
 import {RootState} from "../../../store/store";
 

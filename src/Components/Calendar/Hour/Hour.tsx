@@ -5,12 +5,16 @@ import {FaDollarSign, FaRetweet, FaVideo} from "react-icons/fa";
 import {useEffect, useState} from "react";
 
 import {useSelector, useDispatch} from "react-redux";
-import {addSession,updateSession,deleteSession} from "../../../store/sessionSlice";
-import {getSessionByDate} from '../../../store/sessionSelectors'
+import {addSession,updateSession,deleteSession} from "../../../store/sessions/sessionSlice";
+import {getSessionByDate} from '../../../store/sessions/sessionSelectors'
 import {SessionsListInterface, SessionInterface} from "../../../store/interface";
 import {RootState} from "../../../store/store";
-import {selectStudentById} from "../../../store/studentSlice";
-
+import {selectStudentById} from "../../../store/students/studentSlice";
+import {set} from "../../../store/HourSlice";
+import {HourState} from '../../../store/HourSlice'
+import {useGetStudentByidQuery} from "../../../store/students/studentAPI";
+import {StudentInterface} from '../../../store/interface'
+import {useUpdateSessionsMutation} from "../../../store/sessions/sessionAPI";
 interface SessionWindowParams {
   hour: number;
   date: Date;
@@ -20,31 +24,33 @@ interface Props  {
   hour: number;
   date: Date;
   setIsAddSessionWindowOpen: (params: SessionWindowParams) => void; // Use the SessionWindowParams type here
+  session?: SessionInterface
+  styde?:StudentInterface
+  checkSession: (date: Date) => SessionInterface | undefined; // Add this line
 }
 
 export const Hour: React.FC<Props> = ({
                           hour,
                           date,
-                          setIsAddSessionWindowOpen
-      }) => {
+                          setIsAddSessionWindowOpen,
+                          session,
+                          styde,
+                           checkSession
+}) => {
+
+    let dragging = false;
 
     let dateAdapter = new Date(date)
     dateAdapter.setHours(hour)
+
     const dispatch = useDispatch();
-
-    let session1 = useSelector((state: RootState) => {
-        return getSessionByDate(state, dateAdapter)
-    })
-
-const studentId = session1 !== undefined ? session1.student_id : -1;
-const selectCurrentStudent = selectStudentById(studentId);
-const student = useSelector(selectCurrentStudent);
-
 
 
     const handleDragStart = (e: React.DragEvent) => {
+      console.log('handleDragStart')
+      dragging = true;
       const dragData = {
-        session: session1,
+        session: session,
         originalDate: date,
         originalHour: hour
       };
@@ -53,9 +59,13 @@ const student = useSelector(selectCurrentStudent);
     };
 
 
+     const [updateSesion, { isLoading: isUpdating }] = useUpdateSessionsMutation()
+
      let existingSession = useSelector((state: RootState) => {
             return getSessionByDate(state, dateAdapter)
      })
+
+    // console.log(existingSession, checkSession(dateAdapter))
 
     const handleDrop = (e: React.DragEvent) => {
       e.preventDefault();
@@ -66,16 +76,12 @@ const student = useSelector(selectCurrentStudent);
       const newDate = new Date(date);
       newDate.setHours(hour);
 
-      // Check if there's already a session at the drop location
-      // const existingSession = getSessionByDate(newDate, hour);
 
-      if (existingSession) {
-            // If there is, swap their startDateTime values
-            dispatch(updateSession({ id: dragData.session.id, newSessionData: { ...dragData.session, startDateTime: existingSession.startDateTime } }));
-            dispatch(updateSession({ id: existingSession.id, newSessionData: { ...existingSession, startDateTime: dragData.session.startDateTime } }));
+      if (session) {
+           updateSesion({ ...dragData.session, startDateTime: session.startDateTime, serviceType: 0 } )
+           updateSesion({ ...session, startDateTime: dragData.session.startDateTime, serviceType: 0 } )
       } else {
-        // If there isn't, just update the dropped session
-        dispatch(updateSession({ id: dragData.session.id, newSessionData: { ...dragData.session, startDateTime: newDate.toISOString() } }));
+        updateSesion({ ...dragData.session, startDateTime: newDate.toISOString(), serviceType: 0 } )
       }
     };
 
@@ -84,9 +90,25 @@ const student = useSelector(selectCurrentStudent);
       e.preventDefault();
     };
 
+
+
     const [lastTap, setLastTap] = useState(0);
 
     const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
+
+       if (dragging) {
+        dragging = false;
+        return;
+      }
+
+
+      let aaa : HourState = {
+         value: hour,
+         date: JSON.stringify(date)
+      }
+
+
+
       const currentTime = new Date().getTime();
       const diffTime = currentTime - lastTap;
 
@@ -94,6 +116,7 @@ const student = useSelector(selectCurrentStudent);
         // The current tap happened within 1 second of the last tap, schedule the window to open after 1 second
         setTimeout(() => {
           setIsAddSessionWindowOpen({'hour': hour,'date': date});
+          dispatch(set(aaa))
         }, 1000);
       }
 
@@ -101,11 +124,12 @@ const student = useSelector(selectCurrentStudent);
     };
 
 
+
     return (
 <div
     key={hour}
     className='Hour border w-12 h-8 text-xs flex justify-center items-center relative' // Increase height to h-12
-    draggable={session1 !== undefined}
+    draggable={session !== undefined}
     onDragStart={handleDragStart}
     onDrop={handleDrop}
     onDragOver={handleDragOver}
@@ -113,9 +137,11 @@ const student = useSelector(selectCurrentStudent);
     // onMouseUp={handleMouseUp} // Add this line
     onTouchStart={handleMouseDown} // Add this line
     // onTouchEnd={handleMouseUp} // Add this line
+
+
 >
 
-            {session1 &&
+            {session &&
               <div style={{
                 position: 'absolute',
                 top: 0,
@@ -129,17 +155,17 @@ const student = useSelector(selectCurrentStudent);
               }}
               >
                 <FaDollarSign style={{
-                  color: session1.paid ? 'green' : 'red'
+                  color: session.paid ? 'green' : 'red'
                 }}/>
                 <FaVideo style={{
-                  color: session1.online ? 'blue' : 'gray'
+                  color: session.online ? 'blue' : 'gray'
                 }}/>
                 <FaRetweet style={{
-                  color: session1.repeatable ? 'orange' : 'gray'
+                  color: session.repeatable ? 'orange' : 'gray'
                 }}/>
               </div>
         }
-        <p className="mt-2">{session1 && student ? `${student.first_name} ` : ""}</p>
+        <p className="mt-2">{session && styde ? `${styde.first_name} ` : ""}</p>
         </div>
     );
 };

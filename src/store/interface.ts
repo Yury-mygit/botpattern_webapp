@@ -1,26 +1,5 @@
-// export interface Session {
-//     id:number;
-//     date: Date;
-//
-//     duration: number,   // in minute
-//     week_first_day: Date,
-//     student_id: number;
-//     student_name: string;
-//     specialist_id: number;
-//     specialist_name: string;
-//     office_id: number,
-//     office_name: string,
-//     performed: boolean,
-//     paid: boolean;
-//     online: boolean;
-//     confirmed: boolean;
-//     repeatable: boolean;
-//     comments: string;
-// }
-// export interface Sessions extends Array<Session> {}
 
-
-enum ServiceType {
+export enum ServiceType {
   SoundProduction,
   SpeechTherapyMassage,
   StutteringTreatment,
@@ -40,6 +19,26 @@ interface OfficeInterface {
 
   // Other properties...
 }
+
+
+export interface EmployeeInterface {
+  id: number;
+  status: string;
+  position:string;
+  profession?:string;
+  first_name:string;
+  last_name:string;
+  contact_email?:string;
+  contact_telephone?:string;
+  telegram_id?:string;
+  online?:boolean;
+  offline?:boolean;
+}
+
+export interface EmployeesListInterface {
+  employeesList: EmployeeInterface[];
+}
+
 
 export interface StudentInterface {
   id: number;
@@ -62,6 +61,10 @@ export interface StudentInterface {
   notes?:string;
 }
 
+export interface StudentListInterface {
+  studentsList: StudentInterface[];
+}
+
 
 export interface SessionInterface {
   id: number;
@@ -79,6 +82,10 @@ export interface SessionInterface {
   repeatable: boolean;
   notes: string;
   status: string; // Could be an enum if there's a fixed set of statuses
+}
+
+export interface SessionListInterface {
+  sessionsList: SessionInterface[]
 }
 
 

@@ -1,6 +1,6 @@
 // @flow
 import * as React from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import {Link, NavLink, Outlet, useNavigate} from 'react-router-dom';
 
 const allowedUsers : number[] = [
     // 565047052,
@@ -17,7 +17,7 @@ export  const Root = (props: Props) => {
 
   React.useEffect(() => {
     if (allowedUsers.includes(props.id)) {
-      navigate('/admin');
+      navigate('/calendar');
     } else if (superUsers.includes(props.id)) {
       navigate('/superadmin');
     } else {
@@ -26,9 +26,15 @@ export  const Root = (props: Props) => {
   }, [navigate]);
 
     return (
-        <div>
-            {/*<h1>Привет мир!</h1>*/}
-            <Outlet/>
+        <div className="flex flex-col w-96 p-2 ">
+          <div className="flex flex-row justify-between">
+          <Link to="calendar">Календарь</Link>
+          <Link to="students">Ученики</Link>
+          <Link to="employees">Сотрудники</Link>
+          <Link to="payments">Платежа</Link>
+
+          </div>
+          <Outlet/>
         </div>
     );
 };

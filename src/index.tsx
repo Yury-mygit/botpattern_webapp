@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+import './scc/index.css';
 import App from './App';
 import {User} from './Components/User/User'
 import {Root} from "./Components/Root"
@@ -15,6 +15,8 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
+import {StudentsView} from "./students/StudentsView";
+import Employess from "./employee/Employess";
 
 interface User {
   id: number;
@@ -33,10 +35,26 @@ function getRoutesForUser(user: User) {
   if (isAdmin(user)) {
     return [
       {
-        path: "admin",
+        path: "calendar",
         element:<App  />,
         errorElement:<h1 className="flex align-middle justify-center">Возникла ошибка</h1>,
       },
+      {
+        path: "students",
+        element:<StudentsView/>,
+        errorElement:<h1 className="flex align-middle justify-center">Возникла ошибка</h1>,
+      },
+      {
+        path: "employees",
+        element:<Employess/>,
+        errorElement:<h1 className="flex align-middle justify-center">Возникла ошибка</h1>,
+      },
+      {
+        path: "payments",
+        element:<div> payments in process</div>,
+        errorElement:<h1 className="flex align-middle justify-center">Возникла ошибка</h1>,
+      },
+
     ];
   } else {
     return [
@@ -50,18 +68,29 @@ function getRoutesForUser(user: User) {
 }
 
 
-// let tg = window.Telegram.WebApp;
-// const params = new URLSearchParams(tg.initData);
-const params = new URLSearchParams('query_id=AAEM760hAAAAAAzvrSEARQWe&user=%7B%22id%22%3A565047052%2C%22first_name%22%3A%22Yury%22%2C%22last_name%22%3A%22%22%2C%22username%22%3A%22Yury_Gurian%22%2C%22language_code%22%3A%22en%22%2C%22allows_write_to_pm%22%3Atrue%7D&auth_date=1699713413&hash=7b9bd0d6adbf4ddb2101728938a63f2a49fac26382dd2fd6b8c1bee5f5561877');
+declare global {
+  interface Window {
+    Telegram: any;
+  }
+}
+
+let tg;
+let params;
+if ('Telegram' in window) {
+  tg = window.Telegram.WebApp;
+  params = new URLSearchParams(tg.initData);
+}
+else {
+  params = new URLSearchParams('query_id=AAEM760hAAAAAAzvrSEARQWe&user=%7B%22id%22%3A565047052%2C%22first_name%22%3A%22Yury%22%2C%22last_name%22%3A%22%22%2C%22username%22%3A%22Yury_Gurian%22%2C%22language_code%22%3A%22en%22%2C%22allows_write_to_pm%22%3Atrue%7D&auth_date=1699713413&hash=7b9bd0d6adbf4ddb2101728938a63f2a49fac26382dd2fd6b8c1bee5f5561877');
+}
 
 const queryId = params.get('query_id');
-// const user = JSON.parse(decodeURIComponent(params.get('user')!));
+let user = JSON.parse(decodeURIComponent(params.get('user')!));
 const authDate = params.get('auth_date');
 const hash = params.get('hash');
 
-//565047052
-
-const user = {
+if (!user){
+  user = {
   id: 565047052,
   first_name: "Yury",
   last_name: "",
@@ -69,6 +98,9 @@ const user = {
   language_code: "en",
   allows_write_to_pm: true
 };
+}
+
+// console.log(user)
 
 const router = createBrowserRouter([
   {
@@ -106,3 +138,14 @@ root.render(
   //                   <textarea readOnly value={Object.entries(user).map(([key, value]) => `${key}: ${value}`).join('\n')} />
   //
   //               </div>,
+
+//565047052
+
+// const user = {
+//   id: 565047052,
+//   first_name: "Yury",
+//   last_name: "",
+//   username: "Yury_Gurian",
+//   language_code: "en",
+//   allows_write_to_pm: true
+// };
