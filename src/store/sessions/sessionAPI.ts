@@ -8,7 +8,7 @@ import {ServiceType} from "../interface";
 export const sessionAPI = createApi({
   reducerPath: 'sessionAPI',
   tagTypes:['sessions'],
-  baseQuery: fetchBaseQuery({ baseUrl: 'http://127.0.0.1:8000' }),
+  baseQuery: fetchBaseQuery({ baseUrl: 'http://127.0.0.1:3002' }),
   endpoints: (builder) => ({
     getSessionById: builder.query<SessionInterface, string>({
       query: (id) => `sessions/${id}`,
@@ -16,13 +16,13 @@ export const sessionAPI = createApi({
     }),
     getAllSessions: builder.query<SessionInterface, void>({
 
-      query: () => `sessions`,
+      query: () => `session`,
       providesTags: ['sessions'],
     }),
     updateSessions: builder.mutation<SessionInterface, Partial<SessionInterface>>({
       // note: an optional `queryFn` may be used in place of `query`
       query: ({ ...patch }) => ({
-        url: `sessions`,
+        url: `session`,
         method: 'PATCH',
         body: patch,
       }),

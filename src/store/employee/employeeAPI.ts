@@ -3,14 +3,14 @@ import {EmployeeInterface} from '../interface'
 
 export const employeeApi = createApi({
   reducerPath: 'employeeApi',
-  baseQuery: fetchBaseQuery({ baseUrl: 'http://127.0.0.1:8000/' }),
+  baseQuery: fetchBaseQuery({ baseUrl: 'http://127.0.0.1:3002/' }),
   tagTypes:['Employee'],
   endpoints: (builder) => ({
     getEmployeeByid: builder.query<EmployeeInterface, string>({
       query: (id) => `employee/${id}`,
     }),
     getAllEmployees: builder.query<EmployeeInterface[], void>({
-      query: () => `employees`,
+      query: () => `employee`,
     }),
 
     addEmployee: builder.mutation<EmployeeInterface, Partial<EmployeeInterface>>({

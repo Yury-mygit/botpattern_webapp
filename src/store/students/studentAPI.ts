@@ -3,7 +3,7 @@ import {StudentInterface} from '../interface'
 
 export const studentApi = createApi({
   reducerPath: 'studentApi',
-  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8000/' }),
+  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:3002/' }),
   tagTypes:['Students'],
   endpoints: (builder) => ({
     getStudentByid: builder.query<StudentInterface, string>({

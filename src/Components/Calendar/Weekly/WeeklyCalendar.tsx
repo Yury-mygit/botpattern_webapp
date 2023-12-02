@@ -16,6 +16,7 @@ import {useGetAllSessionsQuery} from "../../../store/sessions/sessionAPI";
 import {SessionInterface, StudentInterface} from "../../../store/interface";
 import {useGetAllStudentsQuery} from "../../../store/students/studentAPI";
 import {useGetAllEmployeesQuery, useGetEmployeeByidQuery} from "../../../store/employee/employeeAPI";
+import {l, lc} from '../../lib'
 
 type WeeklyCalendarProps = {
   selectedDay: Date | null;
@@ -35,6 +36,7 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
 
     const {data, error, isLoading} = useGetAllSessionsQuery();
     const globalSessions = data as SessionInterface[] | undefined;
+    // console.log(globalSessions)
 
     const {data: stud, error: studEr, isLoading: il} = useGetAllStudentsQuery()
     const globalstudents = stud as StudentInterface[] | undefined
@@ -82,10 +84,26 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
 
     const getSession = (hour: number, day: Date): SessionInterface | undefined => {
       day.setHours(hour);
-      return globalSessions.find((session: SessionInterface) => {
-        const sessionDate = new Date(session.startDateTime.replace(' ', 'T'));
-        return sessionDate.getTime() === day.getTime();
-      });
+
+
+        const a = globalSessions.find((session: SessionInterface) => {
+            const sessionDate = new Date(session.startDateTime.replace(' ', 'T'));
+
+            const sessionDay = new Date(sessionDate.getFullYear(), sessionDate.getMonth(), sessionDate.getDate(), sessionDate.getHours());
+            const compareDay = new Date(day.getFullYear(), day.getMonth(), day.getDate(), day.getHours());
+
+            // console.log(compareDay);
+
+            return sessionDay.getTime() === compareDay.getTime();
+        });
+
+     // console.log(day, a)
+    return a
+      // return globalSessions.find((session: SessionInterface) => {
+      //   const sessionDate = new Date(session.startDateTime.replace(' ', 'T'));
+      //   return sessionDate.getTime() === day.getTime();
+      // });
+
     }
 
     const getStudent = (hour: number, day: Date ) => {
