@@ -44,7 +44,7 @@ export const Hour: React.FC<Props> = ({
     dateAdapter.setHours(hour)
 
     const dispatch = useDispatch();
-
+    console.log(styde)
 
     const handleDragStart = (e: React.DragEvent) => {
       console.log('handleDragStart')

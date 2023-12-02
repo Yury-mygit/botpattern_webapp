@@ -83,27 +83,13 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({selectedDay, setS
     if (globalSessions == undefined) return (<div></div>)
 
     const getSession = (hour: number, day: Date): SessionInterface | undefined => {
-      day.setHours(hour);
-
-
-        const a = globalSessions.find((session: SessionInterface) => {
-            const sessionDate = new Date(session.startDateTime.replace(' ', 'T'));
-
+        day.setHours(hour);
+        return globalSessions.find((session: SessionInterface) => {
+            const sessionDate = new Date(session.startDateTime );
             const sessionDay = new Date(sessionDate.getFullYear(), sessionDate.getMonth(), sessionDate.getDate(), sessionDate.getHours());
             const compareDay = new Date(day.getFullYear(), day.getMonth(), day.getDate(), day.getHours());
-
-            // console.log(compareDay);
-
             return sessionDay.getTime() === compareDay.getTime();
         });
-
-     // console.log(day, a)
-    return a
-      // return globalSessions.find((session: SessionInterface) => {
-      //   const sessionDate = new Date(session.startDateTime.replace(' ', 'T'));
-      //   return sessionDate.getTime() === day.getTime();
-      // });
-
     }
 
     const getStudent = (hour: number, day: Date ) => {
